@@ -70,7 +70,7 @@ class InstrumentConnectionWidget(QWidget):
             if not self.instrument.isConnected():
                 self.combo.setEnabled(True)
                 self.button.setText("Connect")
-                self.intrument.control.setEnabled(False)
+                self.instrument.control.setEnabled(False)
 
 
 class DelaylineControlWidget(QWidget):
@@ -117,6 +117,7 @@ class DelaylineControlWidget(QWidget):
         self.button_set.setText("Set")
         self.button_get.setFixedWidth(self.BUTTON_FIXED_WIDTH)
         self.button_set.setFixedWidth(self.BUTTON_FIXED_WIDTH)
+        self.button_get.clicked.connect(self._getCommand)
         self.button_set.clicked.connect(self._setCommand)
         
     def _entryConfig(self):
@@ -141,4 +142,14 @@ class DelaylineControlWidget(QWidget):
     def _setCommand(self):
         if self.entry.hasAcceptableInput():
             position = float(self.entry.text())
-            self.instrument.returnTo(position)
+            try:
+                self.instrument.returnTo(position)
+                print(f"{self.instrument.name} returned to {position}mm")
+            except:
+                print(f"Could not return the {self.instrument.name} to {position}mm")
+                
+    def _getCommand(self):
+        try:
+            self.entry.setText(self.instrument.getPosition())
+        except:
+            print(f"Could not retrieve the {self.instrument.name} current position")
