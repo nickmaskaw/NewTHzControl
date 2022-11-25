@@ -1,6 +1,6 @@
 import os
 from pyvisa import ResourceManager
-from instruments import InstrumentWidget
+from instruments import InstrumentConnectionWidget
 
 class VISAInstrument:
     PRESET_FOLDER = './preset'
@@ -9,7 +9,7 @@ class VISAInstrument:
         self._name    = name
         self._address = None
         self._instr   = None
-        self._widget  = InstrumentWidget(self)
+        self._widget  = InstrumentConnectionWidget(self)
         
     @property
     def name(self): return self._name

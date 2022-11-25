@@ -1,4 +1,5 @@
-from instruments import InstrumentWidget, DelaylineControlWidget
+from instruments import InstrumentConnectionWidget, DelaylineControlWidget
+import os
 import time as tm
 import sys
 import clr
@@ -23,7 +24,7 @@ class KBD101:
         self._name    = name
         self._serial  = None
         self._device  = None
-        self._widget  = InstrumentWidget(self)
+        self._widget  = InstrumentConnectionWidget(self)
         self._control = DelaylineControlWidget(self)
         
     @property
@@ -32,8 +33,6 @@ class KBD101:
     def serial(self): return self._serial
     @property
     def device(self): return self._device
-    @property
-    def instr(self): return self._device  # just for widget compatibility
     @property
     def widget(self): return self._widget
     @property
@@ -53,7 +52,7 @@ class KBD101:
         if isinstance(self.serial, str) and self.serial[:2] == "28":
             if self.serial in self.addressList():
                 try:
-                    self._device = KCubeBrushlessMotor.CreateKCubeBrushlessMotor(serial)
+                    self._device = KCubeBrushlessMotor.CreateKCubeBrushlessMotor(self.serial)
                     self.device.Connect(self.serial)
                     tm.sleep(.2)
                     self.device.LoadMotorConfiguration(self.serial)
