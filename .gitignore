@@ -1,0 +1,15 @@
+# Extensions
+*.pyc
+*.ipynb
+*.txt
+*.bat
+*.pptx
+
+# Folders
+output/
+preset/
+.idea/
+tests/
+
+# Files
+t.py
