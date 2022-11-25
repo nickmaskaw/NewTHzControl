@@ -62,10 +62,10 @@ class KBD101:
                     self._device = None
                     print(f"Failed to connect the {self.name} ({self.serial})")
             else:
-                print(f"Failed to connect the {self.name}. You must specify an address within:\n{self.addressList()}")
+                print(f"Failed to connect the {self.name}. You must specify an address within:\n{list(self.addressList())}")
             
         else:
-            print(f"Failed to connect the {self.name}\nCheck if the intended serial number is a string that begins with '28'")
+            print(f"Failed to connect the {self.name}. Check if the intended serial number is a string that begins with '28'")
             
     def disconnect(self):
         try:
