@@ -33,6 +33,8 @@ class KBD101:
     @property
     def device(self): return self._device
     @property
+    def instr(self): return self._instr
+    @property
     def widget(self): return self._widget
     @property
     def control(self): return self._control
