@@ -150,6 +150,6 @@ class DelaylineControlWidget(QWidget):
                 
     def _getCommand(self):
         try:
-            self.entry.setText(self.instrument.getPosition())
+            self.entry.setText(str(self.instrument.getPosition()))
         except:
             print(f"Could not retrieve the {self.instrument.name} current position")
