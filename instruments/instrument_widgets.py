@@ -1,5 +1,8 @@
 from PyQt6.QtWidgets import QWidget, QLabel, QPushButton, QComboBox, QLineEdit, QHBoxLayout
+from PyQt6.QtGui import QDoubleValidator
+from PyQt6.QtCore import Qt, QLocale
 from pyvisa import ResourceManager
+
 
 class InstrumentConnectionWidget(QWidget):
     LABEL_FIXED_WIDTH  = 100
@@ -59,6 +62,7 @@ class InstrumentConnectionWidget(QWidget):
             if self.instrument.isConnected():
                 self.combo.setEnabled(False)
                 self.button.setText("Disconnect")
+                self.instrument.control.setEnabled(True)
                 self.instrument.savePresetAddress()
                 
         elif self.button.text() == "Disconnect":
@@ -66,6 +70,7 @@ class InstrumentConnectionWidget(QWidget):
             if not self.instrument.isConnected():
                 self.combo.setEnabled(True)
                 self.button.setText("Connect")
+                self.intrument.control.setEnabled(False)
 
 
 class DelaylineControlWidget(QWidget):
@@ -84,8 +89,11 @@ class DelaylineControlWidget(QWidget):
         self._layout     = QHBoxLayout(self)        
         
         self._labelConfig()
+        self._entryConfig()
         self._buttonConfig()
         self._layoutConfig()
+        
+        self.setEnabled(False)
         
     @property
     def instrument(self): return self._instrument
@@ -109,6 +117,19 @@ class DelaylineControlWidget(QWidget):
         self.button_set.setText("Set")
         self.button_get.setFixedWidth(self.BUTTON_FIXED_WIDTH)
         self.button_set.setFixedWidth(self.BUTTON_FIXED_WIDTH)
+        self.button_set.clicked.connect(self._setCommand)
+        
+    def _entryConfig(self):
+        validator = QDoubleValidator()
+        locale = QLocale(QLocale.Language.English, QLocale.Country.UnitedStates)
+        validator.setLocale(locale)
+        validator.setNotation(QDoubleValidator.Notation.StandardNotation)
+        validator.setBottom(self.instrument.MINIMUM_POSITION)
+        validator.setTop(self.instrument.MAXIMUM_POSITION)
+        
+        self.entry.setValidator(validator)
+        self.entry.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.entry.returnPressed.connect(self._setCommand)
         
     def _layoutConfig(self):
         self.layout.addWidget(self.label)
@@ -116,3 +137,8 @@ class DelaylineControlWidget(QWidget):
         self.layout.addWidget(self.button_get)
         self.layout.addWidget(self.button_set)
         self.layout.setContentsMargins(*self.CONTENTS_MARGINS)
+        
+    def _setCommand(self):
+        if self.entry.hasAcceptableInput():
+            position = float(self.entry.text())
+            self.instrument.returnTo(position)

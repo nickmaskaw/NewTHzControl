@@ -19,6 +19,8 @@ from Thorlabs.MotionControl.KCube.BrushlessMotorCLI import KCubeBrushlessMotor
 
 class KBD101:
     PRESET_FOLDER = './preset'
+    MINIMUM_POSITION = 0.0
+    MAXIMUM_POSITION = 100.0
 
     def __init__(self, name):
         self._name    = name
