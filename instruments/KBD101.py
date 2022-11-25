@@ -33,7 +33,7 @@ class KBD101:
     @property
     def device(self): return self._device
     @property
-    def instr(self): return self._instr
+    def instr(self): return self._device  # just for widget compatibility
     @property
     def widget(self): return self._widget
     @property
