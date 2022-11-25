@@ -120,9 +120,13 @@ class KBD101:
         self.setVelocity(100)
         self.moveTo(position, timeout)
         
+    def requestPosition(self):
+        self.device.RequestPosition()
+        
     def getPosition(self):
         position = str(self.device.Position).replace(',', '.')
         return float(position)
         
-    
-    
+    def currentPosition(self):
+        self.requestPosition()
+        return self.getPosition()
