@@ -85,7 +85,7 @@ class KBD101:
         preset_serial = ""
         try:
             with open(f'{self.PRESET_FOLDER}/{self.name}_serial') as file:
-                preset_address = file.readlines()[0]
+                preset_serial = file.readlines()[0]
             print(f"Loaded {self.name} preset serial")
         except:
             print(f"No {self.name} serial found in the preset folder")
