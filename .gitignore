@@ -4,6 +4,7 @@
 *.txt
 *.bat
 *.pptx
+*.dat
 
 # Folders
 output/

@@ -18,10 +18,10 @@ class InstrumentConnectionWidget(QWidget):
         self._button = QPushButton()
         self._layout = QHBoxLayout(self)
         
-        self._labelConfig()
-        self._comboConfig()
-        self._buttonConfig()
-        self._layoutConfig()
+        self._setUpLabel()
+        self._setUpCombo()
+        self._setUpButton()
+        self._setUpLayout()
         
     @property
     def instrument(self): return self._instrument
@@ -34,22 +34,23 @@ class InstrumentConnectionWidget(QWidget):
     @property
     def layout(self): return self._layout
     
-    def _labelConfig(self):
+    def _setUpLabel(self):
         self.label.setText(f"{self.instrument.name}:")
         self.label.setFixedWidth(self.LABEL_FIXED_WIDTH)
         
-    def _comboConfig(self):
+    def _setUpCombo(self):
         rm = ResourceManager()
         self.combo.addItems(self.instrument.addressList())
         self.combo.setEditable(True)
         self.combo.setCurrentText(self.instrument.loadPresetAddress())
         
-    def _buttonConfig(self):
+    def _setUpButton(self):
         self.button.setText("Connect")
         self.button.setFixedWidth(self.BUTTON_FIXED_WIDTH)
         self.button.clicked.connect(self._buttonClicked)
+        self.button.clicked.connect(lambda: print("foo"))
         
-    def _layoutConfig(self):
+    def _setUpLayout(self):
         self.layout.addWidget(self.label)
         self.layout.addWidget(self.combo)
         self.layout.addWidget(self.button)
@@ -62,7 +63,7 @@ class InstrumentConnectionWidget(QWidget):
             if self.instrument.isConnected():
                 self.combo.setEnabled(False)
                 self.button.setText("Disconnect")
-                self.instrument.control.setEnabled(True)
+                if self.instrument.control: self.instrument.control.setEnabled(True)
                 self.instrument.savePresetAddress()
                 
         elif self.button.text() == "Disconnect":
@@ -70,7 +71,7 @@ class InstrumentConnectionWidget(QWidget):
             if not self.instrument.isConnected():
                 self.combo.setEnabled(True)
                 self.button.setText("Connect")
-                self.instrument.control.setEnabled(False)
+                if self.instrument.control: self.instrument.control.setEnabled(False)
 
 
 class DelaylineControlWidget(QWidget):

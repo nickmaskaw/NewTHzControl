@@ -10,6 +10,7 @@ class VISAInstrument:
         self._address = None
         self._instr   = None
         self._widget  = InstrumentConnectionWidget(self)
+        self._control = None
         
     @property
     def name(self): return self._name
@@ -19,6 +20,8 @@ class VISAInstrument:
     def instr(self): return self._instr
     @property
     def widget(self): return self._widget
+    @property
+    def control(self): return self._control
     @property
     def idn(self): return ""
     
