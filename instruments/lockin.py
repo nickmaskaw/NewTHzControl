@@ -44,31 +44,31 @@ class LockIn(VISAInstrument):
         super().__init__(name)
 
     def get_XY(self):
-        X, Y = self.instr.query('SNAP?1,2').split(',')
+        X, Y = self.device.query('SNAP?1,2').split(',')
         return float(X), float(Y)
 
     def get_X(self):
-        X = self.instr.query('OUTP?1')
+        X = self.device.query('OUTP?1')
         return float(X)
 
     def get_Y(self):
-        Y = self.instr.query('OUTP?2')
+        Y = self.device.query('OUTP?2')
         return float(Y)
 
     def get_phase(self):
-        phase = self.instr.query('PHAS?')
+        phase = self.device.query('PHAS?')
         return float(phase)
 
     def get_freq(self):
-        freq = self.instr.query('FREQ?')
+        freq = self.device.query('FREQ?')
         return float(freq)
 
     def get_sens(self):
         """ Returns 0 if sensitivity out of range """
-        i = self.instr.query('SENS?')
+        i = self.device.query('SENS?')
         return self.SENS_LIST[i] if i in self.SENS_LIST else 0
 
     def get_tcons(self):
-        i = self.instr.query('OFLT?')
+        i = self.device.query('OFLT?')
         return self.TCONS_LIST[i]
     

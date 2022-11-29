@@ -6,17 +6,17 @@ class Multimeter(VISAInstrument):
         super().__init__(name)
 
     def volt(self):
-        volt = self.instr.query('MEAS?')
+        volt = self.device.query('MEAS?')
         return float(volt)
 
     def curr(self):
-        curr = self.instr.query('MEAS:CURR?')
+        curr = self.device.query('MEAS:CURR?')
         return float(curr)
 
     def fres(self):
-        fres = self.instr.query('MEAS:FRES?')
+        fres = self.device.query('MEAS:FRES?')
         return float(fres)
 
     def res(self):
-        res = self.instr.query('MEAS:RES?')
+        res = self.device.query('MEAS:RES?')
         return float(res)
