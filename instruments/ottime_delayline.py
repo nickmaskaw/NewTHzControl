@@ -13,7 +13,7 @@ class OttimeDelayline(VISAInstrument):
     @property
     def velocity(self): return self._velocity
         
-    def setVolocity(self, velocity):
+    def setVelocity(self, velocity):
         self._velocity = velocity
         
     def moveTo(self, position):
