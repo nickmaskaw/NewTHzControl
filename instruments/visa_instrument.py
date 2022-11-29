@@ -11,7 +11,7 @@ class VISAInstrumentSignals(QObject):
 class VISAInstrument:
     PRESET_FOLDER = './preset'
 
-    def __init__(self, name):
+    def __init__(self, name="VISA Instrument"):
         self._name    = name
         self._address = None
         self._device  = None

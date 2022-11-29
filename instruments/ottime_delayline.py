@@ -5,6 +5,6 @@ class OttimeDelayline(VISAInstrument):
     MINIMUM_POSITION = 0.0
     MAXIMUM_POSITION = 200.0
     
-    def __init__(self, name):
+    def __init__(self, name="Ottime Delay-line"):
         super().__init__(name)
         

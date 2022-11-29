@@ -15,10 +15,11 @@ class ConnectionContainer(QWidget):
         
         
 class ControlContainer(QWidget):
-    def __init__(self, pmp_dl, thz_dl):
+    def __init__(self, cernox, pmp_dl, thz_dl):
         super().__init__()
         
         layout = QVBoxLayout(self)
+        layout.addWidget(TemperatureControlWidget(cernox))
         layout.addWidget(DelaylineControlWidget(pmp_dl))
         layout.addWidget(DelaylineControlWidget(thz_dl))
         layout.setSpacing(0)
@@ -196,4 +197,77 @@ class DelaylineControlWidget(QWidget):
         
     @pyqtSlot()
     def _instrumentDisconnected(self):
-        self.combo.setEnabled(False)
+        self.setEnabled(False)
+        
+        
+class TemperatureControlWidget(QWidget):
+    LABEL_FIXED_WIDTH  = 100
+    BUTTON_FIXED_WIDTH = 40
+    CONTENTS_MARGINS   = 0, 5, 0, 0
+    
+    def __init__(self, instrument):
+        super().__init__()
+        
+        self._instrument = instrument
+        self._label      = QLabel()
+        self._entry      = QLineEdit()
+        self._button     = QPushButton()
+        self._layout     = QHBoxLayout(self)
+        
+        self._configLabel()
+        self._configEntry()
+        self._configButton()
+        self._configLayout()
+        self._configSlots()
+        
+        self.setEnabled(False)
+        
+    @property
+    def instrument(self): return self._instrument
+    @property
+    def label(self): return self._label
+    @property
+    def entry(self): return self._entry
+    @property
+    def button(self): return self._button
+    @property
+    def layout(self): return self._layout
+    
+    def _configLabel(self):
+        self.label.setText(f"{self.instrument.name}:")
+        self.label.setFixedWidth(self.LABEL_FIXED_WIDTH)
+        
+    def _configEntry(self):
+        self.entry.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.entry.returnPressed.connect(self._buttonClicked)
+        
+    def _configButton(self):
+        self.button.setText("Get")
+        self.button.setFixedWidth(self.BUTTON_FIXED_WIDTH)
+        self.button.clicked.connect(self._buttonClicked)
+        
+    def _configLayout(self):
+        self.layout.addWidget(self.label)
+        self.layout.addWidget(self.entry)
+        self.layout.addWidget(self.button)
+        self.layout.addSpacing(self.BUTTON_FIXED_WIDTH+6)
+        self.layout.setContentsMargins(*self.CONTENTS_MARGINS)
+        
+    def _configSlots(self):
+        self.instrument.signals.connected.connect(self._instrumentConnected)
+        self.instrument.signals.disconnected.connect(self._instrumentDisconnected)
+        
+    @pyqtSlot()
+    def _buttonClicked(self):
+        try:
+            self.entry.setText(str(self.instrument.temperature()))
+        except:
+            print(f"Could not retrieve the {self.instrument.name} current temperature")
+        
+    @pyqtSlot()
+    def _instrumentConnected(self):
+        self.setEnabled(True)
+        
+    @pyqtSlot()
+    def _instrumentDisconnected(self):
+        self.setEnabled(False)

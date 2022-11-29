@@ -4,7 +4,7 @@ import pandas as pd
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import QTimer
 from interface import MainWindow, LeftDockWidget, ConnectionContainer, ControlContainer, LivePlot
-from instruments import VISAInstrument, KBD101, OttimeDelayline
+from instruments import VISAInstrument, LockIn, KBD101, OttimeDelayline, Cernox
 
 def update():
     global liveplot, timer, i, t, X
@@ -15,15 +15,15 @@ def update():
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     
-    lockin = VISAInstrument("Lock-in")
-    cernox = VISAInstrument("Cernox")
+    lockin = LockIn()
+    cernox = Cernox()
     pmp_dl = OttimeDelayline("Pump delay-line")
     thz_dl = KBD101("THz delay-line")
     
     main_window = MainWindow()
     
     connection_widget = LeftDockWidget("Connection", main_window, ConnectionContainer(lockin, cernox, pmp_dl, thz_dl))
-    control_widget    = LeftDockWidget("Manual Control", main_window, ControlContainer(pmp_dl, thz_dl))
+    control_widget    = LeftDockWidget("Manual Control", main_window, ControlContainer(cernox, pmp_dl, thz_dl))
     
     liveplot = LivePlot(main_window)
     

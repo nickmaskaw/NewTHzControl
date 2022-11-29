@@ -27,7 +27,7 @@ class KBD101:
     MINIMUM_POSITION = 0.0
     MAXIMUM_POSITION = 100.0
 
-    def __init__(self, name):
+    def __init__(self, name="KBD101"):
         self._name    = name
         self._serial  = None
         self._device  = None
