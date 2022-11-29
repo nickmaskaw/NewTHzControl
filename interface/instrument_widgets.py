@@ -20,8 +20,8 @@ class ControlContainer(QWidget):
         
         layout = QVBoxLayout(self)
         layout.addWidget(TemperatureControlWidget(cernox))
-        layout.addWidget(DelaylineControlWidget(pmp_dl))
-        layout.addWidget(DelaylineControlWidget(thz_dl))
+        layout.addWidget(OttimeControlWidget(pmp_dl))
+        layout.addWidget(KBD101ControlWidget(thz_dl))
         layout.setSpacing(0)
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
@@ -101,7 +101,7 @@ class InstrumentConnectionWidget(QWidget):
         self.button.setText("Connect")
         
         
-class DelaylineControlWidget(QWidget):
+class KBD101ControlWidget(QWidget):
     LABEL_FIXED_WIDTH  = 100
     BUTTON_FIXED_WIDTH = 40
     CONTENTS_MARGINS   = 0, 5, 0, 0
@@ -178,6 +178,106 @@ class DelaylineControlWidget(QWidget):
             self.entry.setText(str(self.instrument.currentPosition()))
         except:
             print(f"Could not retrieve the {self.instrument.name} current position")
+        
+    @pyqtSlot()
+    def _buttonSetClicked(self):
+        if self.entry.hasAcceptableInput():
+            position = float(self.entry.text())
+            try:
+                self.instrument.returnTo(position)
+                print(f"{self.instrument.name} returned to {position}mm")
+            except:
+                print(f"Could not return the {self.instrument.name} to {position}mm")
+        else:
+            print(f"Out of {self.instrument.name} range ({self.instrument.MINIMUM_POSITION} to {self.instrument.MAXIMUM_POSITION}mm)")
+                
+    @pyqtSlot()
+    def _instrumentConnected(self):
+        self.setEnabled(True)
+        
+    @pyqtSlot()
+    def _instrumentDisconnected(self):
+        self.setEnabled(False)
+        
+        
+class OttimeControlWidget(QWidget):
+    LABEL_FIXED_WIDTH  = 100
+    BUTTON_FIXED_WIDTH = 40
+    CONTENTS_MARGINS   = 0, 5, 0, 0
+    
+    def __init__(self, instrument):
+        super().__init__()
+        
+        self._instrument  = instrument
+        self._label       = QLabel()
+        self._entry       = QLineEdit()
+        self._button_home = QPushButton()
+        self._button_set  = QPushButton()
+        self._layout      = QHBoxLayout(self)
+        
+        self._configLabel()
+        self._configEntry()
+        self._configButton()
+        self._configLayout()
+        self._configSlots()
+        
+        self.setEnabled(False)
+        
+    @property
+    def instrument(self): return self._instrument
+    @property
+    def label(self): return self._label
+    @property
+    def entry(self): return self._entry
+    @property
+    def button_home(self): return self._button_home
+    @property
+    def button_set(self): return self._button_set
+    @property
+    def layout(self): return self._layout
+    
+    def _configLabel(self):
+        self.label.setText(f"{self.instrument.name}:")
+        self.label.setFixedWidth(self.LABEL_FIXED_WIDTH)
+        
+    def _configEntry(self):
+        validator = QDoubleValidator()
+        locale = QLocale(QLocale.Language.English, QLocale.Country.UnitedStates)
+        validator.setLocale(locale)
+        validator.setNotation(QDoubleValidator.Notation.StandardNotation)
+        validator.setBottom(self.instrument.MINIMUM_POSITION)
+        validator.setTop(self.instrument.MAXIMUM_POSITION)
+        
+        self.entry.setValidator(validator)
+        self.entry.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.entry.returnPressed.connect(self._buttonSetClicked)
+        
+    def _configButton(self):
+        self.button_home.setText("Home")
+        self.button_set.setText("Set")
+        self.button_home.setFixedWidth(self.BUTTON_FIXED_WIDTH)
+        self.button_set.setFixedWidth(self.BUTTON_FIXED_WIDTH)
+        self.button_home.clicked.connect(self._buttonHomeClicked)
+        self.button_set.clicked.connect(self._buttonSetClicked)
+        
+    def _configLayout(self):
+        self.layout.addWidget(self.label)
+        self.layout.addWidget(self.entry)
+        self.layout.addWidget(self.button_home)
+        self.layout.addWidget(self.button_set)
+        self.layout.setContentsMargins(*self.CONTENTS_MARGINS)
+        
+    def _configSlots(self):
+        self.instrument.signals.connected.connect(self._instrumentConnected)
+        self.instrument.signals.disconnected.connect(self._instrumentDisconnected)
+        
+    @pyqtSlot()
+    def _buttonHomeClicked(self):
+        try:
+            self.instrument.home()
+            print(f"{self.instrument.name} found the home")
+        except:
+            print(f"Could not home the {self.instrument.name}")
         
     @pyqtSlot()
     def _buttonSetClicked(self):
