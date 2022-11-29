@@ -17,7 +17,7 @@ class OttimeDelayline(VISAInstrument):
         self._velocity = velocity
         
     def moveTo(self, position):
-        self.device.query('@0M{position},{self.velocity}')
+        self.device.query(f'@0M{position},{self.velocity}')
         
     def returnTo(self, position):
         self.setVelocity(100)
