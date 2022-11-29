@@ -4,7 +4,7 @@ from pandas import read_table
 
 
 class Cernox(Multimeter):
-    CALIBRATION_FILE = './instruments/cernox_calibration/table.dat'
+    CALIBRATION_FILE = './instruments/cernox_calibration/table'
 
     def __init__(self, name="Cernox"):
         super().__init__(name)
