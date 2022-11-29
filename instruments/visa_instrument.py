@@ -1,6 +1,12 @@
 import os
 from pyvisa import ResourceManager
-from instruments import InstrumentConnectionWidget
+from PyQt6.QtCore import QObject, pyqtSignal
+
+
+class VISAInstrumentSignals(QObject):
+    connected    = pyqtSignal()
+    disconnected = pyqtSignal()
+
 
 class VISAInstrument:
     PRESET_FOLDER = './preset'
@@ -8,32 +14,27 @@ class VISAInstrument:
     def __init__(self, name):
         self._name    = name
         self._address = None
-        self._instr   = None
-        self._widget  = InstrumentConnectionWidget(self)
-        self._control = None
+        self._device  = None
+        self._signals = VISAInstrumentSignals()
         
     @property
     def name(self): return self._name
     @property
     def address(self): return self._address
     @property
-    def instr(self): return self._instr
+    def device(self): return self._device
     @property
-    def widget(self): return self._widget
-    @property
-    def control(self): return self._control
+    def signals(self): return self._signals
     @property
     def idn(self): return ""
-    
-    def isConnected(self):
-        return True if self.instr else False
     
     def connect(self):
         rm = ResourceManager()
         if self.address:
             try:
-                self._instr = rm.open_resource(self.address)
-                print(f"Connected the {self.name}: {self.idn} ({self.instr})")
+                self._device = rm.open_resource(self.address)
+                print(f"Connected the {self.name}: {self.idn} ({self.device})")
+                self.signals.connected.emit()
             except:
                 print(f"Failed to connect the {self.name} ({self.address})")
         else:
@@ -41,11 +42,12 @@ class VISAInstrument:
             
     def disconnect(self):
         try:
-            self.instr.close()
-            print(f"Disconnected the {self.name} ({self.instr})")
-            self._instr = None
+            self.device.close()
+            print(f"Disconnected the {self.name} ({self.device})")
+            self._device = None
+            self.signals.disconnected.emit()
         except:
-            print(f"Failed to disconnect the {self.name} ({self.instr})")
+            print(f"Failed to disconnect the {self.name} ({self.device})")
             
     def setAddress(self, address):
         self._address = address

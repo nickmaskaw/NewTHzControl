@@ -1,7 +1,28 @@
-from PyQt6.QtWidgets import QWidget, QLabel, QPushButton, QComboBox, QLineEdit, QHBoxLayout
+from PyQt6.QtWidgets import QWidget, QLabel, QComboBox, QLineEdit, QPushButton, QHBoxLayout, QVBoxLayout
 from PyQt6.QtGui import QDoubleValidator
-from PyQt6.QtCore import Qt, QLocale
-from pyvisa import ResourceManager
+from PyQt6.QtCore import Qt, QLocale, pyqtSlot
+
+
+class ConnectionContainer(QWidget):
+    def __init__(self, lockin, cernox, pmp_dl, thz_dl):
+        super().__init__()
+        
+        layout = QVBoxLayout(self)
+        for instr in (lockin, cernox, pmp_dl, thz_dl): 
+            layout.addWidget(InstrumentConnectionWidget(instr))
+        layout.setSpacing(0)
+        layout.setAlignment(Qt.AlignmentFlag.AlignTop)
+        
+        
+class ControlContainer(QWidget):
+    def __init__(self, pmp_dl, thz_dl):
+        super().__init__()
+        
+        layout = QVBoxLayout(self)
+        layout.addWidget(DelaylineControlWidget(pmp_dl))
+        layout.addWidget(DelaylineControlWidget(thz_dl))
+        layout.setSpacing(0)
+        layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
 
 class InstrumentConnectionWidget(QWidget):
@@ -18,10 +39,11 @@ class InstrumentConnectionWidget(QWidget):
         self._button = QPushButton()
         self._layout = QHBoxLayout(self)
         
-        self._setUpLabel()
-        self._setUpCombo()
-        self._setUpButton()
-        self._setUpLayout()
+        self._configLabel()
+        self._configCombo()
+        self._configButton()
+        self._configLayout()
+        self._configSlots()
         
     @property
     def instrument(self): return self._instrument
@@ -34,46 +56,50 @@ class InstrumentConnectionWidget(QWidget):
     @property
     def layout(self): return self._layout
     
-    def _setUpLabel(self):
+    def _configLabel(self):
         self.label.setText(f"{self.instrument.name}:")
         self.label.setFixedWidth(self.LABEL_FIXED_WIDTH)
         
-    def _setUpCombo(self):
-        rm = ResourceManager()
+    def _configCombo(self):
         self.combo.addItems(self.instrument.addressList())
         self.combo.setEditable(True)
         self.combo.setCurrentText(self.instrument.loadPresetAddress())
         
-    def _setUpButton(self):
+    def _configButton(self):
         self.button.setText("Connect")
         self.button.setFixedWidth(self.BUTTON_FIXED_WIDTH)
         self.button.clicked.connect(self._buttonClicked)
-        self.button.clicked.connect(lambda: print("foo"))
         
-    def _setUpLayout(self):
+    def _configLayout(self):
         self.layout.addWidget(self.label)
         self.layout.addWidget(self.combo)
         self.layout.addWidget(self.button)
         self.layout.setContentsMargins(*self.CONTENTS_MARGINS)
         
+    def _configSlots(self):
+        self.instrument.signals.connected.connect(self._instrumentConnected)
+        self.instrument.signals.disconnected.connect(self._instrumentDisconnected)
+       
+    @pyqtSlot()
     def _buttonClicked(self):
         if self.button.text() == "Connect":
             self.instrument.setAddress(self.combo.currentText())
             self.instrument.connect()
-            if self.instrument.isConnected():
-                self.combo.setEnabled(False)
-                self.button.setText("Disconnect")
-                if self.instrument.control: self.instrument.control.setEnabled(True)
-                self.instrument.savePresetAddress()
-                
         elif self.button.text() == "Disconnect":
             self.instrument.disconnect()
-            if not self.instrument.isConnected():
-                self.combo.setEnabled(True)
-                self.button.setText("Connect")
-                if self.instrument.control: self.instrument.control.setEnabled(False)
-
-
+       
+    @pyqtSlot()
+    def _instrumentConnected(self):
+        self.combo.setEnabled(False)
+        self.button.setText("Disconnect")
+        self.instrument.savePresetAddress()
+        
+    @pyqtSlot()
+    def _instrumentDisconnected(self):
+        self.combo.setEnabled(True)
+        self.button.setText("Connect")
+        
+        
 class DelaylineControlWidget(QWidget):
     LABEL_FIXED_WIDTH  = 100
     BUTTON_FIXED_WIDTH = 40
@@ -87,12 +113,13 @@ class DelaylineControlWidget(QWidget):
         self._entry      = QLineEdit()
         self._button_get = QPushButton()
         self._button_set = QPushButton()
-        self._layout     = QHBoxLayout(self)        
+        self._layout     = QHBoxLayout(self)
         
-        self._labelConfig()
-        self._entryConfig()
-        self._buttonConfig()
-        self._layoutConfig()
+        self._configLabel()
+        self._configEntry()
+        self._configButton()
+        self._configLayout()
+        self._configSlots()
         
         self.setEnabled(False)
         
@@ -109,19 +136,11 @@ class DelaylineControlWidget(QWidget):
     @property
     def layout(self): return self._layout
     
-    def _labelConfig(self):
+    def _configLabel(self):
         self.label.setText(f"{self.instrument.name}:")
         self.label.setFixedWidth(self.LABEL_FIXED_WIDTH)
         
-    def _buttonConfig(self):
-        self.button_get.setText("Get")
-        self.button_set.setText("Set")
-        self.button_get.setFixedWidth(self.BUTTON_FIXED_WIDTH)
-        self.button_set.setFixedWidth(self.BUTTON_FIXED_WIDTH)
-        self.button_get.clicked.connect(self._getCommand)
-        self.button_set.clicked.connect(self._setCommand)
-        
-    def _entryConfig(self):
+    def _configEntry(self):
         validator = QDoubleValidator()
         locale = QLocale(QLocale.Language.English, QLocale.Country.UnitedStates)
         validator.setLocale(locale)
@@ -131,16 +150,36 @@ class DelaylineControlWidget(QWidget):
         
         self.entry.setValidator(validator)
         self.entry.setAlignment(Qt.AlignmentFlag.AlignRight)
-        self.entry.returnPressed.connect(self._setCommand)
+        self.entry.returnPressed.connect(self._buttonSetClicked)
         
-    def _layoutConfig(self):
+    def _configButton(self):
+        self.button_get.setText("Get")
+        self.button_set.setText("Set")
+        self.button_get.setFixedWidth(self.BUTTON_FIXED_WIDTH)
+        self.button_set.setFixedWidth(self.BUTTON_FIXED_WIDTH)
+        self.button_get.clicked.connect(self._buttonGetClicked)
+        self.button_set.clicked.connect(self._buttonSetClicked)
+        
+    def _configLayout(self):
         self.layout.addWidget(self.label)
         self.layout.addWidget(self.entry)
         self.layout.addWidget(self.button_get)
         self.layout.addWidget(self.button_set)
         self.layout.setContentsMargins(*self.CONTENTS_MARGINS)
         
-    def _setCommand(self):
+    def _configSlots(self):
+        self.instrument.signals.connected.connect(self._instrumentConnected)
+        self.instrument.signals.disconnected.connect(self._instrumentDisconnected)
+        
+    @pyqtSlot()
+    def _buttonGetClicked(self):
+        try:
+            self.entry.setText(str(self.instrument.currentPosition()))
+        except:
+            print(f"Could not retrieve the {self.instrument.name} current position")
+        
+    @pyqtSlot()
+    def _buttonSetClicked(self):
         if self.entry.hasAcceptableInput():
             position = float(self.entry.text())
             try:
@@ -148,9 +187,13 @@ class DelaylineControlWidget(QWidget):
                 print(f"{self.instrument.name} returned to {position}mm")
             except:
                 print(f"Could not return the {self.instrument.name} to {position}mm")
+        else:
+            print(f"Out of {self.instrument.name} range ({self.instrument.MINIMUM_POSITION} to {self.instrument.MAXIMUM_POSITION}mm)")
                 
-    def _getCommand(self):
-        try:
-            self.entry.setText(str(self.instrument.currentPosition()))
-        except:
-            print(f"Could not retrieve the {self.instrument.name} current position")
+    @pyqtSlot()
+    def _instrumentConnected(self):
+        self.setEnabled(True)
+        
+    @pyqtSlot()
+    def _instrumentDisconnected(self):
+        self.combo.setEnabled(False)

@@ -1,4 +1,4 @@
-from instruments import InstrumentConnectionWidget, DelaylineControlWidget
+from PyQt6.QtCore import QObject, pyqtSignal
 import os
 import time as tm
 import sys
@@ -17,6 +17,11 @@ clr.AddReference("Thorlabs.MotionControl.KCube.BrushlessMotorCLI")
 from Thorlabs.MotionControl.KCube.BrushlessMotorCLI import KCubeBrushlessMotor
 
 
+class KBD101Signals(QObject):
+    connected    = pyqtSignal()
+    disconnected = pyqtSignal()
+
+
 class KBD101:
     PRESET_FOLDER = './preset'
     MINIMUM_POSITION = 0.0
@@ -26,8 +31,7 @@ class KBD101:
         self._name    = name
         self._serial  = None
         self._device  = None
-        self._widget  = InstrumentConnectionWidget(self)
-        self._control = DelaylineControlWidget(self)
+        self._signals = KBD101Signals()
         
     @property
     def name(self): return self._name
@@ -36,9 +40,7 @@ class KBD101:
     @property
     def device(self): return self._device
     @property
-    def widget(self): return self._widget
-    @property
-    def control(self): return self._control
+    def signals(self): return self._signals
     @property
     def idn(self):
         try:
@@ -46,9 +48,6 @@ class KBD101:
             return f"{device_info.Name} (serial no. {device_info.SerialNumber})"
         except:
             return ""
-            
-    def isConnected(self):
-        return True if self.device else False
     
     def connect(self):
         if isinstance(self.serial, str) and self.serial[:2] == "28":
@@ -59,12 +58,12 @@ class KBD101:
                     tm.sleep(.2)
                     self.device.LoadMotorConfiguration(self.serial)
                     print(f"Connected the {self.name}: {self.idn}")
+                    self.signals.connected.emit()
                 except:
                     self._device = None
                     print(f"Failed to connect the {self.name} ({self.serial})")
             else:
                 print(f"Failed to connect the {self.name}. You must specify an address within:\n{list(self.addressList())}")
-            
         else:
             print(f"Failed to connect the {self.name}. Check if the intended serial number is a string that begins with '28'")
             
@@ -73,6 +72,7 @@ class KBD101:
             self.device.Disconnect()
             print(f"Disconnected the {self.name} ({self.serial})")
             self._device = None
+            self.signals.disconnected.emit()
         except:
             print(f"Failed to disconnect the {self.name} ({self.serial})")
             
