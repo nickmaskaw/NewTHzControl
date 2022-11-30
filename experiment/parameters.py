@@ -1,4 +1,4 @@
-from pandas import DataFrame, read_table
+from pandas import DataFrame, read_table, concat
 
 
 class Parameters:
@@ -6,6 +6,9 @@ class Parameters:
         self.hidden    = HiddenParams()
         self.mandatory = MandatoryParams()
         self.info      = InfoParams()
+        
+    @property
+    def table(self): return concat([self.mandatory.table, self.info.table, self.hidden.table])
         
         
 class ParamGroup:
@@ -17,7 +20,7 @@ class ParamGroup:
         for param in self.dictionary:
             df = self.dictionary[param].table
             df.index = [param]
-            table_ = table_.append(df)
+            table_ = concat([table_, df])
         return table_
         
     def load(self, folder, file):

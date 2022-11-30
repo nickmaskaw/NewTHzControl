@@ -70,3 +70,10 @@ class LeftDockWidget(DockWidget):
         
         self.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea)
         self.parent.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self)
+        
+class RightDockWidget(DockWidget):
+    def __init__(self, parent, name, widget):
+        super().__init__(parent, name, widget)
+        
+        self.setAllowedAreas(Qt.DockWidgetArea.RightDockWidgetArea)
+        self.parent.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self)

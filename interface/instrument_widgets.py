@@ -98,6 +98,7 @@ class InstrumentConnectionWidget(QWidget):
         
 class KBD101ControlWidget(QWidget):
     LABEL_WIDTH  = 100
+    ENTRY_WIDTH  = 150
     BUTTON_WIDTH = 40
     CONTENTS_MARGINS   = 0, 5, 0, 0
     
@@ -133,6 +134,7 @@ class KBD101ControlWidget(QWidget):
         
         self.entry.setValidator(validator)
         self.entry.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.entry.setFixedWidth(self.ENTRY_WIDTH)
         self.entry.returnPressed.connect(self._buttonSetClicked)
         
     def _configButton(self):
@@ -149,6 +151,7 @@ class KBD101ControlWidget(QWidget):
         self.layout.addWidget(self.button_get)
         self.layout.addWidget(self.button_set)
         self.layout.setContentsMargins(*self.CONTENTS_MARGINS)
+        self.layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
         
     def _configSlots(self):
         self.instrument.signals.connected.connect(self._instrumentConnected)
@@ -184,6 +187,7 @@ class KBD101ControlWidget(QWidget):
         
 class OttimeControlWidget(QWidget):
     LABEL_WIDTH  = 100
+    ENTRY_WIDTH  = 150
     BUTTON_WIDTH = 40
     CONTENTS_MARGINS   = 0, 5, 0, 0
     
@@ -219,6 +223,7 @@ class OttimeControlWidget(QWidget):
         
         self.entry.setValidator(validator)
         self.entry.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.entry.setFixedWidth(self.ENTRY_WIDTH)
         self.entry.returnPressed.connect(self._buttonSetClicked)
         
     def _configButton(self):
@@ -235,6 +240,7 @@ class OttimeControlWidget(QWidget):
         self.layout.addWidget(self.button_home)
         self.layout.addWidget(self.button_set)
         self.layout.setContentsMargins(*self.CONTENTS_MARGINS)
+        self.layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
         
     def _configSlots(self):
         self.instrument.signals.connected.connect(self._instrumentConnected)
@@ -271,6 +277,7 @@ class OttimeControlWidget(QWidget):
         
 class TemperatureControlWidget(QWidget):
     LABEL_WIDTH  = 100
+    ENTRY_WIDTH  = 150
     BUTTON_WIDTH = 40
     CONTENTS_MARGINS   = 0, 5, 0, 0
     
@@ -297,6 +304,7 @@ class TemperatureControlWidget(QWidget):
         
     def _configEntry(self):
         self.entry.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.entry.setFixedWidth(self.ENTRY_WIDTH)
         self.entry.returnPressed.connect(self._buttonClicked)
         
     def _configButton(self):
@@ -308,8 +316,8 @@ class TemperatureControlWidget(QWidget):
         self.layout.addWidget(self.label)
         self.layout.addWidget(self.entry)
         self.layout.addWidget(self.button)
-        self.layout.addSpacing(self.BUTTON_WIDTH+6)
         self.layout.setContentsMargins(*self.CONTENTS_MARGINS)
+        self.layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
         
     def _configSlots(self):
         self.instrument.signals.connected.connect(self._instrumentConnected)
