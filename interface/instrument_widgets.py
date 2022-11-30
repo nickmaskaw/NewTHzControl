@@ -3,63 +3,58 @@ from PyQt6.QtGui import QDoubleValidator
 from PyQt6.QtCore import Qt, QLocale, pyqtSlot
 
 
-class ConnectionContainer(QWidget):
+class InstrumentWidgets:
     def __init__(self, lockin, cernox, pmp_dl, thz_dl):
+        self.connection = ConnectionContainer(lockin, cernox, thz_dl, pmp_dl)
+        self.controller = ControllerContainer(cernox, thz_dl, pmp_dl)
+
+
+class ConnectionContainer(QWidget):
+    def __init__(self, lockin, cernox, thz_dl, pmp_dl):
         super().__init__()
         
         layout = QVBoxLayout(self)
-        for instr in (lockin, cernox, pmp_dl, thz_dl): 
+        for instr in (lockin, cernox, thz_dl, pmp_dl): 
             layout.addWidget(InstrumentConnectionWidget(instr))
         layout.setSpacing(0)
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         
         
-class ControlContainer(QWidget):
-    def __init__(self, cernox, pmp_dl, thz_dl):
+class ControllerContainer(QWidget):
+    def __init__(self, cernox, thz_dl, pmp_dl):
         super().__init__()
         
         layout = QVBoxLayout(self)
         layout.addWidget(TemperatureControlWidget(cernox))
-        layout.addWidget(OttimeControlWidget(pmp_dl))
         layout.addWidget(KBD101ControlWidget(thz_dl))
+        layout.addWidget(OttimeControlWidget(pmp_dl))
         layout.setSpacing(0)
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
 
 
 class InstrumentConnectionWidget(QWidget):
-    LABEL_FIXED_WIDTH  = 100
-    BUTTON_FIXED_WIDTH = 80
+    LABEL_WIDTH  = 100
+    BUTTON_WIDTH = 80
     CONTENTS_MARGINS   = 0, 5, 0, 0
     
     def __init__(self, instrument):
         super().__init__()
         
-        self._instrument = instrument
-        self._label  = QLabel()
-        self._combo  = QComboBox()
-        self._button = QPushButton()
-        self._layout = QHBoxLayout(self)
+        self.instrument = instrument
+        self.label  = QLabel()
+        self.combo  = QComboBox()
+        self.button = QPushButton()
+        self.layout = QHBoxLayout(self)
         
         self._configLabel()
         self._configCombo()
         self._configButton()
         self._configLayout()
         self._configSlots()
-        
-    @property
-    def instrument(self): return self._instrument
-    @property
-    def label(self): return self._label
-    @property
-    def combo(self): return self._combo
-    @property
-    def button(self): return self._button
-    @property
-    def layout(self): return self._layout
     
     def _configLabel(self):
         self.label.setText(f"{self.instrument.name}:")
-        self.label.setFixedWidth(self.LABEL_FIXED_WIDTH)
+        self.label.setFixedWidth(self.LABEL_WIDTH)
         
     def _configCombo(self):
         self.combo.addItems(self.instrument.addressList())
@@ -68,7 +63,7 @@ class InstrumentConnectionWidget(QWidget):
         
     def _configButton(self):
         self.button.setText("Connect")
-        self.button.setFixedWidth(self.BUTTON_FIXED_WIDTH)
+        self.button.setFixedWidth(self.BUTTON_WIDTH)
         self.button.clicked.connect(self._buttonClicked)
         
     def _configLayout(self):
@@ -102,19 +97,19 @@ class InstrumentConnectionWidget(QWidget):
         
         
 class KBD101ControlWidget(QWidget):
-    LABEL_FIXED_WIDTH  = 100
-    BUTTON_FIXED_WIDTH = 40
+    LABEL_WIDTH  = 100
+    BUTTON_WIDTH = 40
     CONTENTS_MARGINS   = 0, 5, 0, 0
     
     def __init__(self, instrument):
         super().__init__()
         
-        self._instrument = instrument
-        self._label      = QLabel()
-        self._entry      = QLineEdit()
-        self._button_get = QPushButton()
-        self._button_set = QPushButton()
-        self._layout     = QHBoxLayout(self)
+        self.instrument = instrument
+        self.label      = QLabel()
+        self.entry      = QLineEdit()
+        self.button_get = QPushButton()
+        self.button_set = QPushButton()
+        self.layout     = QHBoxLayout(self)
         
         self._configLabel()
         self._configEntry()
@@ -124,22 +119,9 @@ class KBD101ControlWidget(QWidget):
         
         self.setEnabled(False)
         
-    @property
-    def instrument(self): return self._instrument
-    @property
-    def label(self): return self._label
-    @property
-    def entry(self): return self._entry
-    @property
-    def button_get(self): return self._button_get
-    @property
-    def button_set(self): return self._button_set
-    @property
-    def layout(self): return self._layout
-    
     def _configLabel(self):
         self.label.setText(f"{self.instrument.name}:")
-        self.label.setFixedWidth(self.LABEL_FIXED_WIDTH)
+        self.label.setFixedWidth(self.LABEL_WIDTH)
         
     def _configEntry(self):
         validator = QDoubleValidator()
@@ -156,8 +138,8 @@ class KBD101ControlWidget(QWidget):
     def _configButton(self):
         self.button_get.setText("Get")
         self.button_set.setText("Set")
-        self.button_get.setFixedWidth(self.BUTTON_FIXED_WIDTH)
-        self.button_set.setFixedWidth(self.BUTTON_FIXED_WIDTH)
+        self.button_get.setFixedWidth(self.BUTTON_WIDTH)
+        self.button_set.setFixedWidth(self.BUTTON_WIDTH)
         self.button_get.clicked.connect(self._buttonGetClicked)
         self.button_set.clicked.connect(self._buttonSetClicked)
         
@@ -201,19 +183,19 @@ class KBD101ControlWidget(QWidget):
         
         
 class OttimeControlWidget(QWidget):
-    LABEL_FIXED_WIDTH  = 100
-    BUTTON_FIXED_WIDTH = 40
+    LABEL_WIDTH  = 100
+    BUTTON_WIDTH = 40
     CONTENTS_MARGINS   = 0, 5, 0, 0
     
     def __init__(self, instrument):
         super().__init__()
         
-        self._instrument  = instrument
-        self._label       = QLabel()
-        self._entry       = QLineEdit()
-        self._button_home = QPushButton()
-        self._button_set  = QPushButton()
-        self._layout      = QHBoxLayout(self)
+        self.instrument  = instrument
+        self.label       = QLabel()
+        self.entry       = QLineEdit()
+        self.button_home = QPushButton()
+        self.button_set  = QPushButton()
+        self.layout      = QHBoxLayout(self)
         
         self._configLabel()
         self._configEntry()
@@ -223,22 +205,9 @@ class OttimeControlWidget(QWidget):
         
         self.setEnabled(False)
         
-    @property
-    def instrument(self): return self._instrument
-    @property
-    def label(self): return self._label
-    @property
-    def entry(self): return self._entry
-    @property
-    def button_home(self): return self._button_home
-    @property
-    def button_set(self): return self._button_set
-    @property
-    def layout(self): return self._layout
-    
     def _configLabel(self):
         self.label.setText(f"{self.instrument.name}:")
-        self.label.setFixedWidth(self.LABEL_FIXED_WIDTH)
+        self.label.setFixedWidth(self.LABEL_WIDTH)
         
     def _configEntry(self):
         validator = QDoubleValidator()
@@ -255,8 +224,8 @@ class OttimeControlWidget(QWidget):
     def _configButton(self):
         self.button_home.setText("Home")
         self.button_set.setText("Set")
-        self.button_home.setFixedWidth(self.BUTTON_FIXED_WIDTH)
-        self.button_set.setFixedWidth(self.BUTTON_FIXED_WIDTH)
+        self.button_home.setFixedWidth(self.BUTTON_WIDTH)
+        self.button_set.setFixedWidth(self.BUTTON_WIDTH)
         self.button_home.clicked.connect(self._buttonHomeClicked)
         self.button_set.clicked.connect(self._buttonSetClicked)
         
@@ -301,18 +270,18 @@ class OttimeControlWidget(QWidget):
         
         
 class TemperatureControlWidget(QWidget):
-    LABEL_FIXED_WIDTH  = 100
-    BUTTON_FIXED_WIDTH = 40
+    LABEL_WIDTH  = 100
+    BUTTON_WIDTH = 40
     CONTENTS_MARGINS   = 0, 5, 0, 0
     
     def __init__(self, instrument):
         super().__init__()
         
-        self._instrument = instrument
-        self._label      = QLabel()
-        self._entry      = QLineEdit()
-        self._button     = QPushButton()
-        self._layout     = QHBoxLayout(self)
+        self.instrument = instrument
+        self.label      = QLabel()
+        self.entry      = QLineEdit()
+        self.button     = QPushButton()
+        self.layout     = QHBoxLayout(self)
         
         self._configLabel()
         self._configEntry()
@@ -322,20 +291,9 @@ class TemperatureControlWidget(QWidget):
         
         self.setEnabled(False)
         
-    @property
-    def instrument(self): return self._instrument
-    @property
-    def label(self): return self._label
-    @property
-    def entry(self): return self._entry
-    @property
-    def button(self): return self._button
-    @property
-    def layout(self): return self._layout
-    
     def _configLabel(self):
         self.label.setText(f"{self.instrument.name}:")
-        self.label.setFixedWidth(self.LABEL_FIXED_WIDTH)
+        self.label.setFixedWidth(self.LABEL_WIDTH)
         
     def _configEntry(self):
         self.entry.setAlignment(Qt.AlignmentFlag.AlignRight)
@@ -343,14 +301,14 @@ class TemperatureControlWidget(QWidget):
         
     def _configButton(self):
         self.button.setText("Get")
-        self.button.setFixedWidth(self.BUTTON_FIXED_WIDTH)
+        self.button.setFixedWidth(self.BUTTON_WIDTH)
         self.button.clicked.connect(self._buttonClicked)
         
     def _configLayout(self):
         self.layout.addWidget(self.label)
         self.layout.addWidget(self.entry)
         self.layout.addWidget(self.button)
-        self.layout.addSpacing(self.BUTTON_FIXED_WIDTH+6)
+        self.layout.addSpacing(self.BUTTON_WIDTH+6)
         self.layout.setContentsMargins(*self.CONTENTS_MARGINS)
         
     def _configSlots(self):

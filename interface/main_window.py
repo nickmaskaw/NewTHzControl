@@ -7,20 +7,29 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         
-        self.setUpUI()
-        self.setUpMenuBar()
+        self._initUI()
         
-    def setUpUI(self):
+    def _initUI(self):
         self.setWindowTitle("THz-TDS Control")
         self.setWindowIcon(QIcon("icon/icon.png"))
-    
-    def setUpMenuBar(self):
+        
         menu_bar = self.menuBar()
         self.window_menu = menu_bar.addMenu("&Window")
         
+    def setInstrumentWidgets(self, instrument_widgets):
+        connection_widget = LeftDockWidget(self, "Instrument Connections", instrument_widgets.connection)
+        controller_widget = LeftDockWidget(self, "Instrument Controllers", instrument_widgets.controller)
+        
+    def setExperimentWidgets(self, experiment_widgets):
+        parameters_widget = LeftDockWidget(self, "Parameters Definitions", experiment_widgets.parameters)
+    
+    def setLivePlot(self, live_plot):
+        self.setCentralWidget(live_plot)
+        
+        
 
 class DockWidget(QDockWidget):
-    def __init__(self, name, parent, widget):
+    def __init__(self, parent, name, widget):
         super().__init__(name, parent)
         
         self._name   = name
@@ -56,8 +65,8 @@ class DockWidget(QDockWidget):
             
             
 class LeftDockWidget(DockWidget):
-    def __init__(self, name, parent, widget):
-        super().__init__(name, parent, widget)
+    def __init__(self, parent, name, widget):
+        super().__init__(parent, name, widget)
         
         self.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea)
         self.parent.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self)

@@ -1,3 +1,4 @@
-from .main_window import MainWindow, LeftDockWidget
+from .main_window import MainWindow
 from .liveplot import LivePlot
-from .instrument_widgets import ConnectionContainer, ControlContainer
+from .instrument_widgets import InstrumentWidgets
+from .experiment_widgets import ExperimentWidgets

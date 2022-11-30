@@ -3,24 +3,29 @@ import numpy as np
 import pandas as pd
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import QTimer
-from interface import MainWindow, LeftDockWidget, ConnectionContainer, ControlContainer, LivePlot
+from interface import MainWindow, InstrumentWidgets, LivePlot, ExperimentWidgets
 from instruments import VISAInstrument, LockIn, KBD101, OttimeDelayline, Cernox
+from experiment import Parameters
 
     
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    main_window = MainWindow()
     
     lockin = LockIn()
     cernox = Cernox()
-    pmp_dl = OttimeDelayline("Pump delay-line")
     thz_dl = KBD101("THz delay-line")
+    pmp_dl = OttimeDelayline("Pump delay-line")
+    instrument_widgets = InstrumentWidgets(lockin, cernox, pmp_dl, thz_dl)
     
-    main_window = MainWindow()
+    live_plot = LivePlot()
     
-    connection_widget = LeftDockWidget("Connection", main_window, ConnectionContainer(lockin, cernox, pmp_dl, thz_dl))
-    control_widget    = LeftDockWidget("Manual Control", main_window, ControlContainer(cernox, pmp_dl, thz_dl))
+    parameters = Parameters()
+    experiment_widgets = ExperimentWidgets(parameters)
     
-    liveplot = LivePlot(main_window)  
+    main_window.setInstrumentWidgets(instrument_widgets)
+    main_window.setExperimentWidgets(experiment_widgets)
+    main_window.setLivePlot(live_plot) 
     
     main_window.show()
     
