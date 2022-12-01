@@ -69,7 +69,7 @@ class InstrumentConnectionWidget(QWidget):
     def _initCombo(self):
         self.combo.addItems(self.instrument.addressList())
         self.combo.setEditable(True)
-        self.instrument.setAddress(self.combo.currentText())    
+        self.combo.setCurrentText(self.instrument.loadPresetAddress())    
         
     def _configSlots(self):
         self.instrument.signals.connected.connect(self._instrumentConnected)
