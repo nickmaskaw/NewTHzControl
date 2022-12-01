@@ -40,7 +40,7 @@ class InstrumentControllerContainer(QWidget):
         
 class InstrumentConnectionWidget(QWidget):
     LABEL_WIDTH      = 100
-    COMBO_WIDTH      = 250
+    COMBO_WIDTH      = 280
     BUTTON_WIDTH     = 80
     CONTENTS_MARGINS = 0, 5, 0, 0
     
@@ -69,7 +69,8 @@ class InstrumentConnectionWidget(QWidget):
     def _initCombo(self):
         self.combo.addItems(self.instrument.addressList())
         self.combo.setEditable(True)
-        self.combo.setCurrentText(self.instrument.loadPresetAddress())    
+        self.combo.setCurrentText(self.instrument.loadPresetAddress())
+        self.instrument.setAddress(self.combo.currentText())
         
     def _configSlots(self):
         self.instrument.signals.connected.connect(self._instrumentConnected)
