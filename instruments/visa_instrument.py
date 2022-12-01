@@ -33,6 +33,8 @@ class VISAInstrument:
         if self.address:
             try:
                 self._device = rm.open_resource(self.address)
+                self.device.read_termination  = '\n'
+                self.device.write_termination = '\n'
                 print(f"Connected the {self.name}: {self.idn} ({self.device})")
                 self.signals.connected.emit()
             except:
