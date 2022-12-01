@@ -4,6 +4,9 @@ from instruments import VISAInstrument
 class Multimeter(VISAInstrument):
     def __init__(self, name="Multimeter"):
         super().__init__(name)
+        
+    @property
+    def idn(self): return self.device.query('*IDN?')
 
     def volt(self):
         volt = self.device.query('MEAS?')

@@ -9,7 +9,9 @@ class VISAInstrumentSignals(QObject):
 
 
 class VISAInstrument:
-    PRESET_FOLDER = './preset'
+    PRESET_FOLDER     = './preset'
+    READ_TERMINATION  = '\n'
+    WRITE_TERMINATION = '\n'
 
     def __init__(self, name="VISA Instrument"):
         self._name    = name
@@ -33,8 +35,8 @@ class VISAInstrument:
         if self.address:
             try:
                 self._device = rm.open_resource(self.address)
-                self.device.read_termination  = '\n'
-                self.device.write_termination = '\n'
+                self.device.read_termination  = self.READ_TERMINATION
+                self.device.write_termination = self.WRITE_TERMINATION
                 print(f"Connected the {self.name}: {self.idn} ({self.device})")
                 self.signals.connected.emit()
             except:

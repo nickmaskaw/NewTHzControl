@@ -42,6 +42,9 @@ class LockIn(VISAInstrument):
 
     def __init__(self, name="Lock-in"):
         super().__init__(name)
+        
+    @property
+    def idn(self): return self.device.query('*IDN?')
 
     def XY(self):
         X, Y = self.device.query('SNAP?1,2').split(',')

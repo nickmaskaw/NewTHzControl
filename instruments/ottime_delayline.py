@@ -2,14 +2,18 @@ from instruments import VISAInstrument
 
 
 class OttimeDelayline(VISAInstrument):
-    MINIMUM_POSITION = 0.0
-    MAXIMUM_POSITION = 200.0
+    MINIMUM_POSITION  = 0.0
+    MAXIMUM_POSITION  = 200.0
+    READ_TERMINATION  = '\r\n'
+    WRITE_TERMINATION = '\r\n'
     
     def __init__(self, name="Ottime Delay-line"):
         super().__init__(name)
         
         self._velocity = 100
         
+    @property
+    def idn(self): return "Ottime Delay-line"
     @property
     def velocity(self): return self._velocity
         
