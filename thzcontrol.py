@@ -16,7 +16,7 @@ if __name__ == '__main__':
     cernox = Cernox()
     thz_dl = KBD101("THz delay-line")
     pmp_dl = OttimeDelayline("Pump delay-line")
-    instrument_widget = InstrumentWidget(lockin, cernox, pmp_dl, thz_dl)
+    instrument_widget = InstrumentWidget(lockin, cernox, thz_dl, pmp_dl)
     
     live_plot = LivePlot()
     
