@@ -16,9 +16,8 @@ class MainWindow(QMainWindow):
         menu_bar = self.menuBar()
         self.window_menu = menu_bar.addMenu("&Window")
         
-    def setInstrumentWidgets(self, instrument_widgets):
-        connection_widget = LeftDockWidget(self, "Instrument Connections", instrument_widgets.connection)
-        controller_widget = LeftDockWidget(self, "Instrument Controllers", instrument_widgets.controller)
+    def setInstrumentWidget(self, widget):        
+        instrument_widget = LeftDockWidget(self, "Instruments", widget)
         
     def setExperimentWidgets(self, experiment_widgets):
         parameters_widget = LeftDockWidget(self, "Parameters Definitions", experiment_widgets.parameters)
