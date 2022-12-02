@@ -29,27 +29,14 @@ class Measurement:
     PLOT_FOLDER = './output/plot'
     
     def __init__(self, parameters, lockin, cernox, thz_dl, pmp_dl):
-        self._parameters = parameters
-        self._lockin  = lockin
-        self._cernox  = cernox
-        self._thz_dl  = thz_dl
-        self._pmp_dl  = pmp_dl
-        self._signals = MeasurementSignals()
+        self.parameters = parameters
+        self.lockin  = lockin
+        self.cernox  = cernox
+        self.thz_dl  = thz_dl
+        self.pmp_dl  = pmp_dl
+        self.signals = MeasurementSignals()
         
         self._checkOutputFolders()
-        
-    @property
-    def parameters(self): return self._parameters
-    @property
-    def lockin(self): return self._lockin
-    @property
-    def cernox(self): return self._cernox
-    @property
-    def thz_dl(self): return self._thz_dl
-    @property
-    def pmp_dl(self): return self._pmp_dl
-    @property
-    def signals(self): return self._signals
     
     def _checkOutputFolders(self):
         folders = [self.DATA_FOLDER, self.INFO_FOLDER, self.PLOT_FOLDER]
@@ -60,12 +47,12 @@ class Measurement:
         print("Measurement output folders OK")
             
     def thzScan(self):
-        thz_start = 
-        thz_end   = 
-        thz_step  = 
-        thz_vel   = 
-        tcons     =
-        wait      =
+        thz_start = float(parameters.mandatory.thz_start)
+        thz_end   = float(parameters.mandatory.thz_end)
+        thz_step  = float(parameters.mandatory.thz_step) 
+        thz_vel   = float(parameters.mandatory.thz_vel)
+        tcons     = float(parameters.hidden.tcons) 
+        wait      = float(parameters.mandatory.wait)   
     
         self.thz_dl.returnTo(thz_start)
         self.thz_dl.startPolling(10)

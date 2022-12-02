@@ -7,14 +7,14 @@ class InstrumentWidget(QTabWidget):
     def __init__(self, lockin, cernox, thz_dl, pmp_dl):
         super().__init__()
         
-        self.connection_page = InstrumentConnectionContainer(lockin, cernox, thz_dl, pmp_dl)
-        self.controller_page = InstrumentControllerContainer(lockin, cernox, thz_dl, pmp_dl)
+        self.connection_page = InstrumentConnectionPage(lockin, cernox, thz_dl, pmp_dl)
+        self.controller_page = InstrumentControllerPage(lockin, cernox, thz_dl, pmp_dl)
         
         self.addTab(self.connection_page, "Connections")
         self.addTab(self.controller_page, "Controllers")
         
 
-class InstrumentConnectionContainer(QWidget):
+class InstrumentConnectionPage(QWidget):
     def __init__(self, lockin, cernox, thz_dl, pmp_dl):
         super().__init__()
         
@@ -25,7 +25,7 @@ class InstrumentConnectionContainer(QWidget):
         layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         
         
-class InstrumentControllerContainer(QWidget):
+class InstrumentControllerPage(QWidget):
     def __init__(self, lockin, cernox, thz_dl, pmp_dl):
         super().__init__()
         
