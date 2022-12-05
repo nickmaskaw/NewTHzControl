@@ -27,7 +27,7 @@ if __name__ == '__main__':
     
     # connect slots:
     parameters_widget.set_button.toggled.connect(lambda state: instrument_widget.setPagesEnabled(not state))
-    parameters_widget.start_button.clicked.connect(lambda: measurement.run_())
+    parameters_widget.start_button.clicked.connect(lambda: measurement.run())
     parameters_widget.stop_button.clicked.connect(lambda: measurement.setBreak(True))
     measurement.signals.updated.connect(lambda x, y: liveplot_widget.update(x, y))
     measurement.signals.finished.connect(lambda: parameters_widget.set_button.setChecked(False))
