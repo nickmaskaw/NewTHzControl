@@ -70,7 +70,7 @@ class Measurement:
         self.thz_dl.returnTo(thz_start)
         self.thz_dl.startPolling(10)
         self.thz_dl.setVelocity(thz_vel)
-        tm.sleep(10 * time_constant)
+        tm.sleep(10 * tcons)
         
         N   = int( abs(thz_end - thz_start) / thz_step ) + 1
         pos = np.linspace(thz_start, thz_end, N)
