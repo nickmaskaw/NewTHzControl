@@ -83,6 +83,15 @@ class Measurement:
             self.thz_dl.moveTo(pos[i])
             tm.sleep(wait * tcons)
             X[i] = self.lockin.X()
+            if i % plot_rate == 0:
+                self.signals.updated.emit(pos, X)
+                
+            if self.break_:
+                self.break_ = False
+                break
+            
+            self.signals.finished.emit()
+            print(DataFrame({'pos': pos, 'X': X})
             
         
         R[i] = self.cernox.fres()
