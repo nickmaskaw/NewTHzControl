@@ -59,13 +59,13 @@ class Measurement:
         print("Measurement output folders OK")
             
     def thzScan(self):
-        thz_start = float(parameters.mandatory.thz_start.value)
-        thz_end   = float(parameters.mandatory.thz_end.value)
-        thz_step  = float(parameters.mandatory.thz_step.value) 
-        thz_vel   = float(parameters.mandatory.thz_vel.value)
-        tcons     = float(parameters.hidden.tcons.value) 
-        wait      = float(parameters.mandatory.wait.value)
-        plot_rate = float(parameters.mandatory.plot_rate.value)
+        thz_start = float(self.parameters.mandatory.thz_start.value)
+        thz_end   = float(self.parameters.mandatory.thz_end.value)
+        thz_step  = float(self.parameters.mandatory.thz_step.value) 
+        thz_vel   = float(self.parameters.mandatory.thz_vel.value)
+        tcons     = float(self.parameters.hidden.tcons.value) 
+        wait      = float(self.parameters.mandatory.wait.value)
+        plot_rate = float(self.parameters.mandatory.plot_rate.value)
     
         self.thz_dl.returnTo(thz_start)
         self.thz_dl.startPolling(10)
