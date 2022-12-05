@@ -69,7 +69,7 @@ class Measurement:
     
         self.thz_dl.returnTo(thz_start)
         self.thz_dl.startPolling(10)
-        self.thz_dl.setVelocity(thz_velocity)
+        self.thz_dl.setVelocity(thz_vel)
         tm.sleep(10 * time_constant)
         
         N   = int( abs(thz_end - thz_start) / thz_step ) + 1
