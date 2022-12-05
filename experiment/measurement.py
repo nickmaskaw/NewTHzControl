@@ -133,5 +133,5 @@ class Measurement:
     @pyqtSlot()
     def run(self):
         pool = QThreadPool.globalInstance()
-        worker = MeasurementWorker(self.dumbScan)
+        worker = MeasurementWorker(self.thzScan)
         pool.start(worker)
