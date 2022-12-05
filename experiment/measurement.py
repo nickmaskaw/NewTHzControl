@@ -90,13 +90,10 @@ class Measurement:
                 self.break_ = False
                 break
             
-            self.signals.finished.emit()
-            print(DataFrame({'pos': pos, 'X': X})
-            
-        
+        self.thz_dl.stopPolling()
         R[i] = self.cernox.fres()
-        
-        self.thz_dl.stopPolling()   
+        self.signals.finished.emit()
+        print(DataFrame({'pos': pos, 'X': X}))  
        
     def dumbScan(self):
         t0 = tm.time()
