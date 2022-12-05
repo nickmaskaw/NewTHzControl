@@ -45,7 +45,7 @@ class ParametersWidget(QTabWidget):
             else:
                 self.text.append("Missing some mandatory parameters. Re-check the parameters definitions and/or " +
                                  "if the instruments are properly connected to retrieve hidden parameters")
-                self.set_button.setChecked(False)
+                
         
         
 class MeasurementControlPage(QWidget):
