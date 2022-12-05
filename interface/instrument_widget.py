@@ -13,6 +13,11 @@ class InstrumentWidget(QTabWidget):
         self.addTab(self.connection_page, "Connections")
         self.addTab(self.controller_page, "Controllers")
         
+    @pyqtSlot()
+    def setPagesEnabled(self, state):
+        self.connection_page.setEnabled(state)
+        self.controller_page.setEnabled(state)
+        
 
 class InstrumentConnectionPage(QWidget):
     def __init__(self, lockin, cernox, thz_dl, pmp_dl):

@@ -6,28 +6,42 @@ class Parameters:
     PRESET_FOLDER = './preset'
     PRESET_FILE   = 'parameters'
     
-    def __init__(self):
+    def __init__(self, lockin, cernox):
         self.hidden    = HiddenParams()
         self.mandatory = MandatoryParams()
         self.info      = InfoParams()
         self.unsavable = UnsavableParams()
         
-        self._load_preset()
+        self.lockin = lockin
+        self.cernox = cernox
+        
+        self._loadPreset()
         
     @property
     def table(self): return concat([self.mandatory.table, self.info.table, self.hidden.table])
+    @property
+    def are_valid(self): return all(p.all_values_are_filled for p in (self.mandatory, self.hidden, self.unsavable))
+    
+    def retrieveHiddenParams(self):
+        try:
+            self.hidden.sens.setValue(self.lockin.sens())
+            self.hidden.tcons.setValue(self.lockin.tcons())
+            self.hidden.freq.setValue(self.lockin.freq())
+            self.hidden.temp.setValue(self.cernox.temperature())
+        except:
+            print("Could not retrieve hidden parameters")
     
     def save(self, folder, file):
         self.table.to_csv(f'{folder}/{file}', sep='\t')
         print(f"Saved parameters to {folder}/{file}")
         
-    def save_preset(self):
+    def savePreset(self):
         if not os.path.exists(self.PRESET_FOLDER): os.makerdirs(self.PRESET_FOLDER)
         self.save(self.PRESET_FOLDER, self.PRESET_FILE)
         
-    def _load_preset(self):
+    def _loadPreset(self):
         try:
-            for group in (self.mandatory, self.info, self.hidden):
+            for group in (self.mandatory, self.info):
                 group.load(self.PRESET_FOLDER, self.PRESET_FILE)
             print("Loaded preset parameters")
         except:
@@ -45,6 +59,9 @@ class ParamGroup:
             df.index = [param]
             table_ = concat([table_, df])
         return table_
+    @property
+    def all_values_are_filled(self):
+        return all(self.dictionary[param].has_value for param in self.dictionary)
         
     def load(self, folder, file):
         df = read_table(f'{folder}/{file}', index_col=0).fillna('')
@@ -67,18 +84,17 @@ class MandatoryParams(ParamGroup):
         self.thz_end   = Param("End", "mm", "", 0.0, 100.0)
         self.thz_vel   = Param("THz velocity", "mm/s", "", 0.0, 100.0)
         self.thz_step  = Param("Step size", "mm", "", 0.0, 100.0)
-        self.thz_fixed = Param("Fix at start position")
         self.pmp_start = Param("Start", "mm", "", 0.0, 200.0)
         self.pmp_end   = Param("End", "mm", "", 0.0, 200.0)
         self.pmp_vel   = Param("Pump velocity", "mm/s", "", 0.0, 100.0)
         self.pmp_step  = Param("Step size", "mm", "", 0.0, 200.0)
-        self.pmp_fixed = Param("Fix at start position")
         self.wait      = Param("Wait time", "tcons", "", 0.0, 10.0)
         self.plot_rate = Param("Plot rate", "pts/f", "", 1, 1000)
         
         
 class InfoParams(ParamGroup):
     def __init__(self):
+        self.user   = Param("User")
         self.setup  = Param("Setup no.")
         self.rh     = Param("Humidity", "%")
         self.emit   = Param("Emitter")
@@ -121,6 +137,9 @@ class Param:
     @property
     def table(self):
         return DataFrame({'name': self.name, 'value': self.value, 'unit': self.unit}, index=[0])
-        
+    @property
+    def has_value(self):
+        return bool(str(self.value))
+       
     def setValue(self, value):
         self._value = value

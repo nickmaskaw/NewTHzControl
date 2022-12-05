@@ -17,10 +17,10 @@ class MainWindow(QMainWindow):
         self.window_menu = menu_bar.addMenu("&Window")
         
     def setInstrumentWidget(self, widget):        
-        instrument_widget = LeftDockWidget(self, "Instruments", widget)
+        instrument_widget = DockWidget(self, "Instruments", widget)
         
     def setParametersWidget(self, widget):
-        parameters_widget = LeftDockWidget(self, "Measurement Parameters", widget)
+        parameters_widget = DockWidget(self, "Measurement Parameters", widget)
     
     def setLivePlot(self, live_plot):
         self.setCentralWidget(live_plot)
@@ -34,13 +34,7 @@ class DockWidget(QDockWidget):
         
         self.setWidget(widget)
         self.setFloating(False)
-
-        self.parent.window_menu.addAction(self.toggleViewAction())            
-            
-            
-class LeftDockWidget(DockWidget):
-    def __init__(self, parent, name, widget):
-        super().__init__(parent, name, widget)
-        
         self.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea)
         self.parent.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self)
+
+        self.parent.window_menu.addAction(self.toggleViewAction())            

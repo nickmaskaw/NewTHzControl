@@ -1,7 +1,8 @@
-from PyQt6.QtWidgets import (QWidget, QTabWidget, QLabel, QLineEdit, QHBoxLayout, QVBoxLayout, QGridLayout, QSizePolicy,
-                            QGroupBox, QCheckBox, QPushButton, QTextEdit)
+from PyQt6.QtWidgets import QWidget, QTabWidget, QLabel, QLineEdit, QTextEdit, QCheckBox, QPushButton, QGroupBox
+from PyQt6.QtWidgets import QHBoxLayout, QVBoxLayout, QGridLayout, QSizePolicy
 from PyQt6.QtGui import QDoubleValidator, QIntValidator, QFont
 from PyQt6.QtCore import Qt, QLocale, pyqtSlot
+
 
 class ParametersWidget(QTabWidget):
     def __init__(self, parameters):
@@ -15,74 +16,52 @@ class ParametersWidget(QTabWidget):
         self.addTab(self.scan_page, "Scan")
         self.addTab(self.control_page, "Control")
         
-        self.control_page.set_button.toggled.connect(lambda state: self.info_page.setEnabled(not state))
-        self.control_page.set_button.toggled.connect(lambda state: self.scan_page.setEnabled(not state))
+        self.set_button.toggled.connect(lambda state: self.setPagesEnabled(not state))
+        self.set_button.toggled.connect(lambda state: self._setParameters(state, parameters))
+    
+    @property
+    def set_button(self): return self.control_page.control_widget.set_button
+    @property
+    def start_button(self): return self.control_page.control_widget.start_button
+    @property
+    def stop_button(self): return self.control_page.control_widget.stop_button
+    @property
+    def text(self): return self.control_page.text
+    
+    @pyqtSlot()
+    def setPagesEnabled(self, state):
+        self.info_page.setEnabled(state)
+        self.scan_page.setEnabled(state)
+    @pyqtSlot()
+    def _setParameters(self, state, parameters):
+        if state:
+            self.text.clear()
+            parameters.retrieveHiddenParams()
+            
+            if parameters.are_valid:
+                self.text.append("Parameters are set:")
+                self.text.append(repr(parameters.table))
+                parameters.savePreset()
+            else:
+                self.text.append("Missing some mandatory parameters. Re-check the parameters definitions and/or " +
+                                 "if the instruments are properly connected to retrieve hidden parameters")
+                self.set_button.setChecked(False)
         
         
 class MeasurementControlPage(QWidget):
-    BUTTON_WIDTH = 100
-
     def __init__(self, parameters):
         super().__init__()
         
-        self.parameters   = parameters
-        self.repeat       = EntryWidget(self.parameters.unsavable.repeat, IntValidator, 30)
-        self.set_button   = QPushButton("Set")
-        self.start_button = QPushButton("Start")
-        self.text_area    = QTextEdit()
+        self.control_widget = MeasurementControlWidget(parameters)
         
-        self.set_button.setFixedWidth(self.BUTTON_WIDTH)
-        self.start_button.setFixedWidth(self.BUTTON_WIDTH)
-        
-        self.set_button.setCheckable(True)
-        self.start_button.setCheckable(True)
-        
-        self.start_button.setEnabled(False)
-        
-        self.text_area.setReadOnly(True)
-        self.text_area.setCurrentFont(QFont("Consolas", 10))
-        
-        self._configSlots()
-        
-        control_group = self._createControlGroup()
+        self.text = QTextEdit()
+        self.text.setReadOnly(True)
+        self.text.setCurrentFont(QFont("Consolas", 10))
         
         layout = QVBoxLayout(self)
-        layout.addWidget(control_group)
-        layout.addWidget(self.text_area)
-        
-    def _configSlots(self):
-        self.set_button.toggled.connect(lambda state: self._setCommand(state))
-        self.start_button.toggled.connect(lambda state: self._startCommand(state))
-        
-    def _createControlGroup(self):
-        widget = QWidget()
-        layout = QHBoxLayout(widget)
-        layout.addWidget(self.repeat)
-        layout.addSpacing(self.BUTTON_WIDTH)
-        layout.addWidget(self.set_button)
-        layout.addWidget(self.start_button)
-        layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
-        return widget
-        
-    pyqtSlot()
-    def _setCommand(self, state):
-        self.repeat.setEnabled(not state)
-        self.start_button.setEnabled(state)
-        if state:
-            self.set_button.setText("Unset")
-            self.parameters.save_preset()
-            self.text_area.append(repr(self.parameters.table))
-        else:
-            self.set_button.setText("Set")
-            self.text_area.clear()
-    pyqtSlot()
-    def _startCommand(self, state):
-        self.set_button.setEnabled(not state)
-        if state:
-            self.start_button.setText("Stop")
-        else:
-            self.start_button.setText("Start")
-            self.set_button.setChecked(False)
+        layout.addWidget(self.control_widget)
+        layout.addWidget(self.text)
+
         
         
 class ParametersInfoPage(QWidget):
@@ -91,30 +70,32 @@ class ParametersInfoPage(QWidget):
         
         p = parameters.info
         
-        setup  = EntryWidget(p.setup)
+        user   = EntryWidget(p.user, ALIGN_RIGHT=False)
+        setup  = EntryWidget(p.setup, ALIGN_RIGHT=False)
         rh     = EntryWidget(p.rh)
-        emit   = EntryWidget(p.emit)
-        detec  = EntryWidget(p.detec)
+        emit   = EntryWidget(p.emit, ALIGN_RIGHT=False)
+        detec  = EntryWidget(p.detec, ALIGN_RIGHT=False)
         pcapow = EntryWidget(p.pcapow)
         vbias  = EntryWidget(p.vbias)
         pmppow = EntryWidget(p.pmppow)
         pmppol = EntryWidget(p.pmppol)
-        pols   = EntryWidget(p.pols, ENTRY_WIDTH=340)
-        sample = EntryWidget(p.sample, ENTRY_WIDTH=340)
-        obs    = EntryWidget(p.obs, ENTRY_WIDTH=340)
+        pols   = EntryWidget(p.pols, ENTRY_WIDTH=340, ALIGN_RIGHT=False)
+        sample = EntryWidget(p.sample, ENTRY_WIDTH=340, ALIGN_RIGHT=False)
+        obs    = EntryWidget(p.obs, ENTRY_WIDTH=340, ALIGN_RIGHT=False)
         
         layout = QGridLayout(self)
-        layout.addWidget(setup, 0, 0)
-        layout.addWidget(rh, 0, 1)
-        layout.addWidget(emit, 1, 0)
-        layout.addWidget(detec, 1, 1)
-        layout.addWidget(vbias, 2, 0)
-        layout.addWidget(pcapow, 2, 1)
-        layout.addWidget(pmppol, 3, 0)
-        layout.addWidget(pmppow, 3, 1)
-        layout.addWidget(pols, 4, 0, 1, 2)
-        layout.addWidget(sample, 5, 0, 1, 2)
-        layout.addWidget(obs, 6, 0, 1, 2)
+        layout.addWidget(user, 0, 0)
+        layout.addWidget(setup, 1, 0)
+        layout.addWidget(rh, 1, 1)
+        layout.addWidget(emit, 2, 0)
+        layout.addWidget(detec, 2, 1)
+        layout.addWidget(vbias, 3, 0)
+        layout.addWidget(pcapow, 3, 1)
+        layout.addWidget(pmppol, 4, 0)
+        layout.addWidget(pmppow, 4, 1)
+        layout.addWidget(pols, 5, 0, 1, 2)
+        layout.addWidget(sample, 6, 0, 1, 2)
+        layout.addWidget(obs, 7, 0, 1, 2)
         
         layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)  
 
@@ -135,17 +116,18 @@ class ParametersScanPage(QWidget):
         pmp_end   = EntryWidget(p.pmp_end, DoubleValidator, self.ENTRY_WIDTH)
         pmp_vel   = EntryWidget(p.pmp_vel, DoubleValidator, self.ENTRY_WIDTH)
         pmp_step  = EntryWidget(p.pmp_step, DoubleValidator, self.ENTRY_WIDTH)
-        thz_fixed = CheckBoxWidget(p.thz_fixed)
-        pmp_fixed = CheckBoxWidget(p.pmp_fixed)
         wait      = EntryWidget(p.wait, DoubleValidator, self.ENTRY_WIDTH)
         plot_rate = EntryWidget(p.plot_rate, IntValidator, self.ENTRY_WIDTH)
         
-        thz_group   = self._createVGroup("THz delay-line", thz_start, thz_end, thz_vel, thz_step, thz_fixed)
-        pmp_group   = self._createVGroup("Pump delay-line", pmp_start, pmp_end, pmp_vel, pmp_step, pmp_fixed)
+        thz_fix_button = QPushButton("Fix at start position")
+        pmp_fix_button = QPushButton("Fix at start position")
+        
+        thz_group   = self._createVGroup("THz delay-line", thz_start, thz_end, thz_vel, thz_step, thz_fix_button)
+        pmp_group   = self._createVGroup("Pump delay-line", pmp_start, pmp_end, pmp_vel, pmp_step, pmp_fix_button)
         other_group = self._createHGroup("Other configs", wait, plot_rate)
         
-        thz_fixed.toggled.connect(lambda state: self._fixCommand(state, thz_end))
-        pmp_fixed.toggled.connect(lambda state: self._fixCommand(state, pmp_end))
+        thz_fix_button.clicked.connect(lambda: self._fixCommand(thz_start, thz_end))
+        pmp_fix_button.clicked.connect(lambda: self._fixCommand(pmp_start, pmp_end))
         
         layout = QGridLayout(self)
         layout.addWidget(thz_group, 0, 0)
@@ -170,20 +152,67 @@ class ParametersScanPage(QWidget):
         return group
         
     @pyqtSlot()
-    def _fixCommand(self, state, entry_widget):
-        entry_widget.entry.setReadOnly(state)
-        if state:
-            entry_widget.entry.setText("")
+    def _fixCommand(self, start_param, end_param):
+        end_param.entry.setText(start_param.entry.text())
+
+
+class MeasurementControlWidget(QWidget):
+    LABEL_WIDTH      = 50
+    ENTRY_WIDTH      = 50
+    BUTTON_WIDTH     = 100
+    CONTENTS_MARGINS = 0, 5, 0, 0
+    
+    def __init__(self, parameters):
+        super().__init__()
+        
+        self.repeat       = EntryWidget(parameters.unsavable.repeat, IntValidator, self.ENTRY_WIDTH, self.LABEL_WIDTH)
+        self.set_button   = QPushButton("Set")
+        self.start_button = QPushButton("Start")
+        self.stop_button  = QPushButton("Stop")
+        
+        self.set_button.setCheckable(True)
+        self.start_button.setEnabled(False)
+        self.stop_button.setEnabled(False)
+        
+        layout = QHBoxLayout(self)
+        for item in (self.repeat, self.set_button, self.start_button, self.stop_button):
+            layout.addWidget(item)
+        
+        layout.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        layout.setContentsMargins(*self.CONTENTS_MARGINS)
+        
+        self._connectSlots()
+        
+    def _connectSlots(self):
+        self.set_button.toggled.connect(lambda state: self._setButtonToggled(state))
+        self.start_button.clicked.connect(self._startButtonClicked)
+        self.stop_button.clicked.connect(self._stopButtonClicked)
+        
+    @pyqtSlot()
+    def _setButtonToggled(self, state):
+        self.set_button.setEnabled(True)
+        self.set_button.setText("Unset" if state else "Set")
+        self.repeat.setEnabled(not state)
+        self.stop_button.setEnabled(False)
+        self.start_button.setEnabled(state)
+    @pyqtSlot()
+    def _startButtonClicked(self):
+        self.start_button.setEnabled(False)
+        self.set_button.setEnabled(False)
+        self.stop_button.setEnabled(True)
+    @pyqtSlot()
+    def _stopButtonClicked(self):
+        self.set_button.setChecked(False)
 
 
 class EntryWidget(QWidget):
-    LABEL_WIDTH      = 80
     UNIT_WIDTH       = 40
     CONTENTS_MARGINS = 0, 5, 0, 0
     
-    def __init__(self, param, Validator=None, ENTRY_WIDTH=100):
+    def __init__(self, param, Validator=None, ENTRY_WIDTH=100, LABEL_WIDTH=80, ALIGN_RIGHT=True):
         super().__init__()
         
+        self.LABEL_WIDTH = LABEL_WIDTH
         self.ENTRY_WIDTH = ENTRY_WIDTH
         
         self.param = param
@@ -197,7 +226,7 @@ class EntryWidget(QWidget):
         
         self.entry.setText(self.param.value)
         
-        self.entry.setAlignment(Qt.AlignmentFlag.AlignRight)
+        if ALIGN_RIGHT: self.entry.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.entry.textChanged.connect(self.setValueToParam)
         
         if Validator:

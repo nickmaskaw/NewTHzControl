@@ -2,7 +2,7 @@ import os
 import time as tm
 import numpy as np
 from pandas import DataFrame
-from PyQt6.QtCore import QObject, pyqtSignal
+from PyQt6.QtCore import QObject, pyqtSignal, pyqtSlot
 
 class Constants:
     C = 299_792_458e3/1e12  # mm/ps (~0.3mm/ps)
@@ -19,8 +19,9 @@ class Convert:
         
         
 class MeasurementSignals(QObject):
-    update = pyqtSignal(object)
-    finish = pyqtSignal()
+    started  = pyqtSignal()
+    updated  = pyqtSignal(object, object)
+    finished = pyqtSignal()
         
         
 class Measurement:
@@ -35,6 +36,7 @@ class Measurement:
         self.thz_dl  = thz_dl
         self.pmp_dl  = pmp_dl
         self.signals = MeasurementSignals()
+        self.break_  = False
         
         self._checkOutputFolders()
     
@@ -47,12 +49,13 @@ class Measurement:
         print("Measurement output folders OK")
             
     def thzScan(self):
-        thz_start = float(parameters.mandatory.thz_start)
-        thz_end   = float(parameters.mandatory.thz_end)
-        thz_step  = float(parameters.mandatory.thz_step) 
-        thz_vel   = float(parameters.mandatory.thz_vel)
-        tcons     = float(parameters.hidden.tcons) 
-        wait      = float(parameters.mandatory.wait)   
+        thz_start = float(parameters.mandatory.thz_start.value)
+        thz_end   = float(parameters.mandatory.thz_end.value)
+        thz_step  = float(parameters.mandatory.thz_step.value) 
+        thz_vel   = float(parameters.mandatory.thz_vel.value)
+        tcons     = float(parameters.hidden.tcons.value) 
+        wait      = float(parameters.mandatory.wait.value)
+        plot_rate = float(parameters.mandatory.plot_rate.value)
     
         self.thz_dl.returnTo(thz_start)
         self.thz_dl.startPolling(10)
@@ -68,10 +71,44 @@ class Measurement:
         
         for i in range(N):
             self.thz_dl.moveTo(pos[i])
-            tm.sleep(wait_time * time_constant)
+            tm.sleep(wait * tcons)
             X[i] = self.lockin.X()
             
         
         R[i] = self.cernox.fres()
         
         self.thz_dl.stopPolling()
+        
+    @pyqtSlot()
+    def dumbScan(self):
+        t0 = tm.time()
+        thz_start = float(self.parameters.mandatory.thz_start.value)
+        thz_end   = float(self.parameters.mandatory.thz_end.value)
+        thz_step  = float(self.parameters.mandatory.thz_step.value)
+        thz_vel   = float(self.parameters.mandatory.thz_vel.value)
+        tcons     = .1
+        wait      = float(self.parameters.mandatory.wait.value)
+        plot_rate = float(self.parameters.mandatory.plot_rate.value)
+        
+        N   = int( abs(thz_end - thz_start) / thz_step ) + 1
+        pos = np.linspace(thz_start, thz_end, N)
+        X   = np.full(N, np.nan)
+        
+        self.signals.started.emit()
+        
+        for i in range(N):
+            tm.sleep(wait * tcons)
+            X[i] = (np.random.normal() + i)
+            if i % plot_rate == 0:
+                self.signals.updated.emit(pos, X)
+            
+            if self.break_:
+                self.break_ = False
+                break
+
+        self.signals.finished.emit()
+        print(tm.time() - t0)
+        
+    @pyqtSlot()
+    def setBreak(self, state):
+       self.break_ = state
