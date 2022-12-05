@@ -2,7 +2,7 @@ import os
 import time as tm
 import numpy as np
 from pandas import DataFrame
-from PyQt6.QtCore import QObject, pyqtSignal, pyqtSlot
+from PyQt6.QtCore import QObject, QThreadPool, QRunnable, pyqtSignal, pyqtSlot
 
 class Constants:
     C = 299_792_458e3/1e12  # mm/ps (~0.3mm/ps)
@@ -22,6 +22,16 @@ class MeasurementSignals(QObject):
     started  = pyqtSignal()
     updated  = pyqtSignal(object, object)
     finished = pyqtSignal()
+    
+    
+class MeasurementWorker(QRunnable):
+    def __init__(self, func):
+        super().__init__()
+        self.func = func
+    
+    @pyqtSlot()
+    def run(self):
+        self.func()
         
         
 class Measurement:
@@ -77,9 +87,8 @@ class Measurement:
         
         R[i] = self.cernox.fres()
         
-        self.thz_dl.stopPolling()
-        
-    @pyqtSlot()
+        self.thz_dl.stopPolling()   
+       
     def dumbScan(self):
         t0 = tm.time()
         thz_start = float(self.parameters.mandatory.thz_start.value)
@@ -112,3 +121,8 @@ class Measurement:
     @pyqtSlot()
     def setBreak(self, state):
        self.break_ = state
+    @pyqtSlot()
+    def run(self):
+        pool = QThreadPool.globalInstance()
+        worker = MeasurementWorker(self.dumbScan)
+        pool.start(worker)

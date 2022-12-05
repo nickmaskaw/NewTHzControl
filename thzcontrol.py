@@ -7,21 +7,6 @@ from interface import MainWindow, InstrumentWidget, ParametersWidget, LivePlot
 from instruments import VISAInstrument, LockIn, KBD101, OttimeDelayline, Cernox
 from experiment import Parameters, Measurement
 
-
-class Worker(QRunnable):
-    def __init__(self, func):
-        super().__init__()
-        self.func = func
-    
-    def run(self):
-        self.func()
-        
-
-@pyqtSlot()
-def runTask(thread_pool, measurement):
-    worker = Worker(measurement.dumbScan)
-    thread_pool.start(worker)
-
     
 if __name__ == '__main__':
     app = QApplication(sys.argv)
@@ -42,7 +27,7 @@ if __name__ == '__main__':
     
     # connect slots:
     parameters_widget.set_button.toggled.connect(lambda state: instrument_widget.setPagesEnabled(not state))
-    parameters_widget.start_button.clicked.connect(lambda: runTask(thread_pool, measurement))
+    parameters_widget.start_button.clicked.connect(measurement.run)
     parameters_widget.stop_button.clicked.connect(lambda: measurement.setBreak(True))
     measurement.signals.updated.connect(lambda x, y: liveplot_widget.update(x, y))
     measurement.signals.finished.connect(lambda: parameters_widget.set_button.setChecked(False))
