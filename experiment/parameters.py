@@ -59,10 +59,15 @@ class Parameters:
         i = self.info
         h = self.hidden
         
+        thz_start = m.thz_start.value
+        thz_end   = m.thz_end.value
+        pmp_start = m.pmp_start.value
+        pmp_end  = m.pmp_end.value
+        
         t   = tm.strftime('%Y%m%d-%H%M%S')
         usr = i.user.value
-        thz = f"THZ{m.thz_start.value}-{m.thz_end.value}"
-        pmp = f"PMP{m.pmp_start.value}-{m.pmp_end.value}"
+        thz = f"THZ{thz_start}-{thz_end}" if not thz_start == thz_end else f"THZ{thz_start}"
+        pmp = f"PMP{pmp_start}-{pmp_end}" if not pmp_start == pmp_end else f"PMP{pmp_start}"
         stp = i.setup.value
         rh  = f"{i.rh.value}RH"
         tmp = f"{h.temp.value}K"

@@ -102,7 +102,7 @@ class Measurement:
             elif thz_N == 1 and pmp_N != 1:
                 df = self.pmpScan(pmp_N, pmp_pos, tcons, wait, plot_rate)
             else:
-                print("One and only one between pump and THz scans must be fixed")
+                print("Pump scan or THz scan must be fixed, and not both")
                 break
             
             self._save(df)
