@@ -51,7 +51,7 @@ class Measurement:
         self._checkOutputFolders()
     
     def _checkOutputFolders(self):
-        folders = [self.DATA_FOLDER, self.INFO_FOLDER, self.PLOT_FOLDER]
+        folders = [self.DATA_FOLDER, self.INFO_FOLDER]
         for folder in folders:
             if not os.path.exists(folder):
                 os.makedirs(folder)
