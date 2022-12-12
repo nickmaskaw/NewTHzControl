@@ -88,7 +88,10 @@ class Measurement:
             self.pmp_dl.setVelocity(pmp_vel)
             tm.sleep(10 * tcons)
 
-            self.thzScan(thz_N, thz_pos, tcons, wait, plot_rate)
+            if pmp_N == 1:
+                self.thzScan(thz_N, thz_pos, tcons, wait, plot_rate)
+            if thz_N == 1:
+                self.pmpScan(pmp_N, pmp_pos, tcons, wait, plot_rate)
             
             if self.break_:
                 break
@@ -111,80 +114,30 @@ class Measurement:
         
         print(DataFrame({'pos': pos, 'X': X}))
         return X
-
-    
-    def thzScan_(self):
-        thz_start = float(self.parameters.mandatory.thz_start.value)
-        thz_end   = float(self.parameters.mandatory.thz_end.value)
-        thz_step  = float(self.parameters.mandatory.thz_step.value) 
-        thz_vel   = float(self.parameters.mandatory.thz_vel.value)
-        tcons     = float(self.parameters.hidden.tcons.value) 
-        wait      = float(self.parameters.mandatory.wait.value)
-        plot_rate = float(self.parameters.mandatory.plot_rate.value)
-    
-        self.thz_dl.returnTo(thz_start)
-        self.thz_dl.startPolling(10)
-        self.thz_dl.setVelocity(thz_vel)
-        tm.sleep(10 * tcons)
         
-        N   = int( abs(thz_end - thz_start) / thz_step ) + 1
-        pos = np.linspace(thz_start, thz_end, N)
-        X   = np.full(N, np.nan)
-        R   = np.full(N, np.nan)
-        
-        R[0] = self.cernox.fres()
+    def pmpScan(self, N, pos, tcons, wait, plot_rate):
+        X = np.full(N, np.nan)
         
         for i in range(N):
-            self.thz_dl.moveTo(pos[i])
+            self.pmp_dl.moveTo(pos[i])
             tm.sleep(wait * tcons)
             X[i] = self.lockin.X()
-            if i % plot_rate == 0:
+            if i% plot_rate == 0:
                 self.signals.updated.emit(pos, X)
-                
+                    
             if self.break_:
-                self.break_ = False
                 break
-            
-        self.thz_dl.stopPolling()
-        R[i] = self.cernox.fres()
-        self.signals.finished.emit()
-        print(DataFrame({'pos': pos, 'X': X}))  
-       
-    def dumbScan(self):
-        t0 = tm.time()
-        thz_start = float(self.parameters.mandatory.thz_start.value)
-        thz_end   = float(self.parameters.mandatory.thz_end.value)
-        thz_step  = float(self.parameters.mandatory.thz_step.value)
-        thz_vel   = float(self.parameters.mandatory.thz_vel.value)
-        tcons     = .1
-        wait      = float(self.parameters.mandatory.wait.value)
-        plot_rate = float(self.parameters.mandatory.plot_rate.value)
         
-        N   = int( abs(thz_end - thz_start) / thz_step ) + 1
-        pos = np.linspace(thz_start, thz_end, N)
-        X   = np.full(N, np.nan)
-        
-        self.signals.started.emit()
-        
-        for i in range(N):
-            tm.sleep(wait * tcons)
-            X[i] = (np.random.normal() + i)
-            if i % plot_rate == 0:
-                self.signals.updated.emit(pos, X)
-            
-            if self.break_:
-                self.break_ = False
-                break
+        print(DataFrame({'pos': pos, 'X': X}))
+        return X
 
-        self.signals.finished.emit()
-        print(tm.time() - t0)
         
     @pyqtSlot()
     def setBreak(self, state):
        self.break_ = state
     @pyqtSlot()
     def run(self):
-        self.break_ = False
+        self.setBreak(False)
         pool = QThreadPool.globalInstance()
         worker = MeasurementWorker(self.scan)
         pool.start(worker)
