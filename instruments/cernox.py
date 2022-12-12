@@ -1,5 +1,5 @@
 from instruments import Multimeter
-from numpy import interp
+from numpy import interp, around
 from pandas import read_table
 
 
@@ -15,9 +15,9 @@ class Cernox(Multimeter):
     def calibration(self): return self._calibration
 
     # Try to implement some sort of temperature conversion...
-    def temperature(self):
+    def temperature(self, decimals=0):
         measured_R = self.fres()
         tabled_R   = self.calibration['R']
         tabled_T   = self.calibration['T']
         
-        return interp(measured_R, tabled_R, tabled_T)
+        return around( interp(measured_R, tabled_R, tabled_T), decimals=decimals )

@@ -31,6 +31,12 @@ class Parameters:
             self.hidden.temp.setValue(self.cernox.temperature())
         except:
             print("Could not retrieve hidden parameters")
+            
+    def updateTemperature(self):
+        try:
+            self.hidden.temp.setValue(self.cernox.temperature())
+        except:
+            print("Could not update the temperature value")
     
     def save(self, folder, file):
         self.table.to_csv(f'{folder}/{file}', sep='\t')
@@ -54,16 +60,16 @@ class Parameters:
         h = self.hidden
         
         t   = tm.strftime('%Y%m%d-%H%M%S')
-        thz = f"{m.thz_start.value}-{m.thz_end.value}THZ"
-        pmp = f"{m.pmp_start.value}-{m.pmp_end.value}PMP"
         usr = i.user.value
+        thz = f"THZ{m.thz_start.value}-{m.thz_end.value}"
+        pmp = f"PMP{m.pmp_start.value}-{m.pmp_end.value}"
         stp = i.setup.value
         rh  = f"{i.rh.value}RH"
         tmp = f"{h.temp.value}K"
         smp = i.sample.value
         obs = i.obs.value
         
-        return f"{t}_{thz}_{pmp}_{usr}_{stp}_{rh}_{tmp}_{smp}_{obs}"
+        return f"{t}__{usr}__{thz}__{pmp}__{stp}__{rh}__{tmp}__{smp}__{obs}"
         
         
 class ParamGroup:

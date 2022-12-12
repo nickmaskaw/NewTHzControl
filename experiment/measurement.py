@@ -89,6 +89,8 @@ class Measurement:
         pmp_pos = np.around( np.linspace(pmp_start, pmp_end, pmp_N), decimals=4 )
         
         for rep in range(repeat):
+            self.parameters.updateTemperature()
+        
             self.thz_dl.returnTo(thz_start)
             self.pmp_dl.returnTo(pmp_start)
             self.thz_dl.setVelocity(thz_vel)
