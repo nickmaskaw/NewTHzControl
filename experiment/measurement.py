@@ -89,7 +89,10 @@ class Measurement:
             tm.sleep(10 * tcons)
 
             self.thzScan(thz_N, thz_pos, tcons, wait, plot_rate)
-                    
+            
+            if self.break_:
+                break
+                                
         self.signals.finished.emit()
              
     
@@ -104,7 +107,6 @@ class Measurement:
                 self.signals.updated.emit(pos, X)
                     
             if self.break_:
-                self.break_ = False
                 break
         
         print(DataFrame({'pos': pos, 'X': X}))
@@ -182,6 +184,7 @@ class Measurement:
        self.break_ = state
     @pyqtSlot()
     def run(self):
+        self.break_ = False
         pool = QThreadPool.globalInstance()
         worker = MeasurementWorker(self.scan)
         pool.start(worker)
