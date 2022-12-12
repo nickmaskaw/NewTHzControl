@@ -15,7 +15,7 @@ class Cernox(Multimeter):
     def calibration(self): return self._calibration
 
     # Try to implement some sort of temperature conversion...
-    def temperature(self, decimals=0):
+    def temperature(self, decimals=1):
         measured_R = self.fres()
         tabled_R   = self.calibration['R']
         tabled_T   = self.calibration['T']
