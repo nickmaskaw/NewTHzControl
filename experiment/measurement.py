@@ -78,8 +78,8 @@ class Measurement:
         thz_N = int( abs(thz_end - thz_start) / thz_step ) + 1
         pmp_N = int( abs(pmp_end - pmp_start) / pmp_step ) + 1
         
-        thz_pos = np.linspace(thz_start, thz_end, N)
-        pmp_pos = np.linspace(thz_start, thz_end, N)
+        thz_pos = np.linspace(thz_start, thz_end, thz_N)
+        pmp_pos = np.linspace(pmp_start, pmp_end, pmp_N)
         
         for rep in range(repeat):
             self.thz_dl.returnTo(thz_start)
