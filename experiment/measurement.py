@@ -119,7 +119,10 @@ class Measurement:
         X = np.full(N, np.nan)
         
         for i in range(N):
-            self.pmp_dl.moveTo(pos[i])
+            try:
+                self.pmp_dl.moveTo(pos[i])
+            except:
+                print(f"Pump delay-line error at {pos[i]}")
             tm.sleep(wait * tcons)
             X[i] = self.lockin.X()
             if i% plot_rate == 0:
