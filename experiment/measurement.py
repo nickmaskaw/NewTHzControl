@@ -88,12 +88,12 @@ class Measurement:
             self.pmp_dl.setVelocity(pmp_vel)
             tm.sleep(10 * tcons)
 
-            self.thzScan(thz_N, thz_pos, wait, tcons)
+            self.thzScan(thz_N, thz_pos, tcons, wait, plot_rate)
                     
         self.signals.finished.emit()
              
     
-    def thzScan(self, N, pos, wait, tcons):
+    def thzScan(self, N, pos, tcons, wait, plot_rate):
         X = np.full(N, np.nan)
         
         for i in range(N):
@@ -108,6 +108,7 @@ class Measurement:
                 break
         
         print(DataFrame({'pos': pos, 'X': X}))
+        return X
 
     
     def thzScan_(self):
