@@ -1,4 +1,5 @@
 import os
+import time as tm
 from pandas import DataFrame, read_table, concat
 
 
@@ -46,6 +47,23 @@ class Parameters:
             print("Loaded preset parameters")
         except:
             print("Could not load preset parameters")
+            
+    def generateFilename(self):
+        m = self.mandatory
+        i = self.info
+        h = self.hidden
+        
+        t   = tm.strftime('%Y%m%d-%H%M%S')
+        thz = f"{m.thz_start}-{m.thz_end}THZ"
+        pmp = f"{m.pmp_start}-{m.pmp_end}PMP"
+        usr = i.user
+        stp = i.setup
+        rh  = f"{i.rh}RH"
+        tmp = f"{h.temp}K"
+        smp = i.sample
+        obs = i.obs
+        
+        return f"{t}_{thz}_{pmp}_{usr}_{stp}_{rh}_{tmp}_{smp}_{obs}"
         
         
 class ParamGroup:

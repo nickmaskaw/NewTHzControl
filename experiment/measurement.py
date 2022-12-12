@@ -38,7 +38,6 @@ class MeasurementWorker(QRunnable):
 class Measurement:
     DATA_FOLDER = './output/data'
     INFO_FOLDER = './output/info'
-    PLOT_FOLDER = './output/plot'
     
     def __init__(self, parameters, lockin, cernox, thz_dl, pmp_dl):
         self.parameters = parameters
@@ -58,6 +57,14 @@ class Measurement:
                 os.makedirs(folder)
                 print(f"Created {folder} folder")
         print("Measurement output folders OK")
+        
+    def _save(self, dataframe):
+        filename = self.parameters.generateFilename()
+        
+        self.parameters.save(self.INFO_FOLDER, f"{filename}.txt")
+        dataframe.to_csv(f"{self.DATA_FOLDER}/{filename}.dat", sep='\t', index=False)
+        message = f"Saved data as {filename}"
+        print(message)
 
     def scan(self):
         thz_start = float(self.parameters.mandatory.thz_start.value)
@@ -88,10 +95,15 @@ class Measurement:
             self.pmp_dl.setVelocity(pmp_vel)
             tm.sleep(10 * tcons)
 
-            if pmp_N == 1:
-                self.thzScan(thz_N, thz_pos, tcons, wait, plot_rate)
-            if thz_N == 1:
-                self.pmpScan(pmp_N, pmp_pos, tcons, wait, plot_rate)
+            if pmp_N == 1 and thz_N != 1:
+                df = self.thzScan(thz_N, thz_pos, tcons, wait, plot_rate)
+            elif thz_N == 1 and pmp_N != 1:
+                df = self.pmpScan(pmp_N, pmp_pos, tcons, wait, plot_rate)
+            else:
+                print("One and only one between pump and THz scans must be fixed")
+                break
+            
+            self._save(df)
             
             if self.break_:
                 break
@@ -112,8 +124,8 @@ class Measurement:
             if self.break_:
                 break
         
-        print(DataFrame({'pos': pos, 'X': X}))
-        return X
+        df = DataFrame({'pos': pos, 'X': X})
+        return df
         
     def pmpScan(self, N, pos, tcons, wait, plot_rate):
         X = np.full(N, np.nan)
@@ -121,18 +133,19 @@ class Measurement:
         for i in range(N):
             try:
                 self.pmp_dl.moveTo(pos[i])
+                tm.sleep(wait * tcons)
+                X[i] = self.lockin.X()
             except:
-                print(f"Pump delay-line error at {pos[i]}")
-            tm.sleep(wait * tcons)
-            X[i] = self.lockin.X()
+                print(f"Pump delay-line error at {pos[i]}mm")
+            
             if i% plot_rate == 0:
                 self.signals.updated.emit(pos, X)
                     
             if self.break_:
                 break
         
-        print(DataFrame({'pos': pos, 'X': X}))
-        return X
+        df = DataFrame({'pos': pos, 'X': X})
+        return df
 
         
     @pyqtSlot()
