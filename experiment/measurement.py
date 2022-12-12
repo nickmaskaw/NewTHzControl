@@ -75,34 +75,41 @@ class Measurement:
         plot_rate = int(self.parameters.mandatory.plot_rate.value)
         repeat    = int(self.parameters.unsavable.repeat.value)
         
+        thz_N = int( abs(thz_end - thz_start) / thz_step ) + 1
+        pmp_N = int( abs(pmp_end - pmp_start) / pmp_step ) + 1
+        
+        thz_pos = np.linspace(thz_start, thz_end, N)
+        pmp_pos = np.linspace(thz_start, thz_end, N)
         
         for rep in range(repeat):
             self.thz_dl.returnTo(thz_start)
             self.pmp_dl.returnTo(pmp_start)
-            self.thz_dl.startPolling(10)
             self.thz_dl.setVelocity(thz_vel)
             self.pmp_dl.setVelocity(pmp_vel)
             tm.sleep(10 * tcons)
+
+            self.thzScan(thz_N, thz_pos, wait, tcons)
+                    
+        self.signals.finished.emit()
+             
+    
+    def thzScan(self, N, pos, wait, tcons):
+        X = np.full(N, np.nan)
         
-            N   = int( abs(thz_end - thz_start) / thz_step ) + 1
-            pos = np.linspace(thz_start, thz_end, N)
-            X   = np.full(N, np.nan)
-            
-            for i in range(N):
-                self.thz_dl.moveTo(pos[i])
-                tm.sleep(wait * tcons)
-                X[i] = self.lockin.X()
-                if i% plot_rate == 0:
-                    self.signals.updated.emit(pos, X)
+        for i in range(N):
+            self.thz_dl.moveTo(pos[i])
+            tm.sleep(wait * tcons)
+            X[i] = self.lockin.X()
+            if i% plot_rate == 0:
+                self.signals.updated.emit(pos, X)
                     
-                if self.break_:
-                    self.break_ = False
-                    break
-                    
-            self.thz_dl.stopPolling()
-            self.signals.finished.emit()
-            print(DataFrame({'pos': pos, 'X': X}))  
-            
+            if self.break_:
+                self.break_ = False
+                break
+        
+        print(DataFrame({'pos': pos, 'X': X}))
+
+    
     def thzScan_(self):
         thz_start = float(self.parameters.mandatory.thz_start.value)
         thz_end   = float(self.parameters.mandatory.thz_end.value)
