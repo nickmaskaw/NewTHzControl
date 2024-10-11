@@ -36,8 +36,8 @@ class MeasurementWorker(QRunnable):
         
         
 class Measurement:
-    DATA_FOLDER = './output/data'
-    INFO_FOLDER = './output/info'
+    DATA_FOLDER = './output/data/' + tm.strftime('%Y%m%d')
+    INFO_FOLDER = './output/info/' + tm.strftime('%Y%m%d')
     
     def __init__(self, parameters, lockin, cernox, thz_dl, pmp_dl):
         self.parameters = parameters
