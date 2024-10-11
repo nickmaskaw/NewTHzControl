@@ -4,10 +4,10 @@ import pandas as pd
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import QThreadPool, QRunnable, pyqtSlot
 from interface import MainWindow, InstrumentWidget, ParametersWidget, LivePlot
-from instruments import VISAInstrument, LockIn, KBD101, OttimeDelayline, Cernox
+from instruments import VISAInstrument, LockIn, KBD101, OttimeDelayline_foo, Cernox
 from experiment import Parameters, Measurement
 
-    
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     
@@ -15,7 +15,7 @@ if __name__ == '__main__':
     lockin      = LockIn()
     cernox      = Cernox()
     thz_dl      = KBD101("THz delay-line")
-    pmp_dl      = OttimeDelayline("Pump delay-line")
+    pmp_dl      = OttimeDelayline_foo("Pump delay-line")
     parameters  = Parameters(lockin, cernox)
     measurement = Measurement(parameters, lockin, cernox, thz_dl, pmp_dl)
     thread_pool = QThreadPool()

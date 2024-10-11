@@ -14,3 +14,4 @@ tests/
 
 # Files
 t.py
+*checkpoint.py
